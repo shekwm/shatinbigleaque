@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shatin Big League - 16-Player Single-Set Tennis League Manager</title>
+    <title>Shatin Big League - Real-Time Cloud Tennis League</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Sports Icons -->
@@ -61,10 +61,15 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-tennis-500 bg-clip-text text-transparent">Shatin Big League</h1>
-                    <p class="text-xs text-slate-400 font-medium">16-Player Single-Set Round-Robin Tennis Tour</p>
+                    <div class="flex items-center gap-2">
+                        <p class="text-xs text-slate-400 font-medium">16-Player Single-Set Round-Robin</p>
+                        <span id="sync-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                            <i class="fa-solid fa-cloud"></i> Offline Mode
+                        </span>
+                    </div>
                 </div>
             </div>
-            <!-- Quick Actions / Navigation Tabs -->
+            <!-- Navigation Tabs -->
             <nav class="hidden lg:flex items-center space-x-1 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
                 <button onclick="switchTab('standings')" id="nav-standings" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2">
                     <i class="fa-solid fa-trophy"></i> Standings
@@ -78,14 +83,14 @@
                 <button onclick="switchTab('results')" id="nav-results" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-rectangle-list"></i> Results
                 </button>
-                <button onclick="switchTab('storage')" id="nav-storage" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 text-amber-400">
-                    <i class="fa-solid fa-database"></i> Storage & Data
+                <button onclick="switchTab('sync')" id="nav-sync" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 text-indigo-400">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Cloud Sync
                 </button>
             </nav>
             <!-- Global Controls -->
             <div class="flex items-center space-x-2">
-                <button onclick="switchTab('storage')" class="lg:hidden p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-sm font-semibold transition border border-amber-500/30 flex items-center gap-1.5" title="Storage & Data">
-                    <i class="fa-solid fa-database"></i>
+                <button onclick="switchTab('sync')" class="lg:hidden p-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-sm font-semibold transition border border-indigo-500/30 flex items-center gap-1.5" title="Cloud Sync">
+                    <i class="fa-solid fa-cloud"></i>
                 </button>
                 <button onclick="confirmResetData()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-sm font-semibold transition border border-rose-500/30 flex items-center gap-2">
                     <i class="fa-solid fa-rotate-right"></i> <span class="hidden sm:inline">Reset League</span>
@@ -98,7 +103,7 @@
             <button onclick="switchTab('fixtures')" id="mob-nav-fixtures" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Fixtures</button>
             <button onclick="switchTab('players')" id="mob-nav-players" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Players</button>
             <button onclick="switchTab('results')" id="mob-nav-results" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Results</button>
-            <button onclick="switchTab('storage')" id="mob-nav-storage" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-amber-400 bg-amber-500/10 border border-amber-500/30">Storage</button>
+            <button onclick="switchTab('sync')" id="mob-nav-sync" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-indigo-400 bg-indigo-500/10 border border-indigo-500/30">Cloud Sync</button>
         </div>
     </header>
 
@@ -111,7 +116,7 @@
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
                         <span class="p-2 bg-tennis-500/10 text-tennis-400 rounded-xl"><i class="fa-solid fa-ranking-star"></i></span> Shatin Big League Leaderboard
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">Scoring Rule: <strong class="text-white">3 points for completion + number of games won</strong> (e.g. 6-4 score gives Winner 9 pts, Loser 7 pts).</p>
+                    <p class="text-sm text-slate-400 mt-1">Scoring Rule: <strong class="text-white">3 points for completion + number of games won</strong> (both winner & loser receive points).</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 flex items-center gap-2">
@@ -154,7 +159,7 @@
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
                         <span class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><i class="fa-solid fa-calendar-days"></i></span> Round-Robin Fixtures
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">16 Players = 15 Rounds total. Every player faces each other once in single-set matches (8 matches per round).</p>
+                    <p class="text-sm text-slate-400 mt-1">16 Players = 15 Rounds total. Every player faces each other once in single-set matches.</p>
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
                     <label class="text-xs font-semibold text-slate-400">Select Round:</label>
@@ -177,7 +182,7 @@
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
                         <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl"><i class="fa-solid fa-users"></i></span> Shatin Big League Roster (16 Players)
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">Player 1: Jason, 2: Kiff, 3: Sammi, 4: Jeremy, followed by Players 5 to 16. Edit names or randomize.</p>
+                    <p class="text-sm text-slate-400 mt-1">Player 1: Jason, 2: Kiff, 3: Sammi, 4: Jeremy, followed by Players 5 to 16.</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <button onclick="randomizePlayerNames()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition border border-slate-700 flex items-center gap-2">
@@ -230,83 +235,68 @@
             </div>
         </section>
 
-        <!-- ================= STORAGE & DATA VIEW ================= -->
-        <section id="view-storage" class="space-y-6 hidden">
+        <!-- ================= CLOUD SYNC VIEW ================= -->
+        <section id="view-sync" class="space-y-6 hidden">
             <div class="bg-gradient-to-r from-slate-950 to-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
-                        <span class="p-2 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fa-solid fa-database"></i></span> Browser Local Storage Inspector
+                        <span class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl"><i class="fa-solid fa-cloud"></i></span> Firebase Real-Time Cloud Sync
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">All players, fixture schedules, and single-set scores are securely saved in your browser's <code class="text-tennis-400 font-mono">localStorage</code> under the key <code class="text-tennis-400 font-mono">shatin_big_league_v1</code>.</p>
+                    <p class="text-sm text-slate-400 mt-1">Connect your Firebase Firestore database so scores and player standings sync in real-time across all players' devices.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="exportStorageJSON()" class="px-4 py-2.5 rounded-xl bg-tennis-600 hover:bg-tennis-500 text-white text-sm font-semibold transition shadow-lg shadow-tennis-600/20 flex items-center gap-2">
-                        <i class="fa-solid fa-download"></i> Export JSON Backup
-                    </button>
-                    <label class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition border border-slate-700 cursor-pointer flex items-center gap-2">
-                        <i class="fa-solid fa-upload"></i> Import Backup
-                        <input type="file" id="import-file" accept=".json" onchange="importStorageJSON(event)" class="hidden">
-                    </label>
+                <div id="sync-action-btn-container">
+                    <!-- Dynamic status button -->
                 </div>
             </div>
 
-            <!-- How to find LocalStorage Guide -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-950/80 p-6 rounded-3xl border border-slate-800 space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg"><i class="fa-brands fa-chrome"></i></div>
-                    <h3 class="font-bold text-white text-base">Google Chrome & Brave</h3>
-                    <ol class="text-xs text-slate-400 space-y-2 list-decimal list-inside leading-relaxed">
-                        <li>Right-click anywhere on the page and select <strong class="text-slate-200">Inspect</strong> (or press <kbd class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">F12</kbd>).</li>
-                        <li>Click on the <strong class="text-slate-200">Application</strong> tab at the top of the developer panel.</li>
-                        <li>In the left sidebar, expand <strong class="text-slate-200">Local Storage</strong> under the Storage section.</li>
-                        <li>Click on this website's domain URL to view the stored JSON key <code class="text-tennis-400">shatin_big_league_v1</code>.</li>
-                    </ol>
-                </div>
-
-                <div class="bg-slate-950/80 p-6 rounded-3xl border border-slate-800 space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold text-lg"><i class="fa-brands fa-safari"></i></div>
-                    <h3 class="font-bold text-white text-base">Apple Safari</h3>
-                    <ol class="text-xs text-slate-400 space-y-2 list-decimal list-inside leading-relaxed">
-                        <li>Enable the Develop menu in Safari Settings &gt; Advanced &gt; <strong class="text-slate-200">Show Develop menu in menu bar</strong>.</li>
-                        <li>Open <strong class="text-slate-200">Develop</strong> &gt; <strong class="text-slate-200">Show Web Inspector</strong>.</li>
-                        <li>Go to the <strong class="text-slate-200">Storage</strong> tab.</li>
-                        <li>Select <strong class="text-slate-200">Local Storage</strong> in the sidebar to inspect league items.</li>
-                    </ol>
-                </div>
-
-                <div class="bg-slate-950/80 p-6 rounded-3xl border border-slate-800 space-y-3">
-                    <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold text-lg"><i class="fa-brands fa-firefox-browser"></i></div>
-                    <h3 class="font-bold text-white text-base">Mozilla Firefox</h3>
-                    <ol class="text-xs text-slate-400 space-y-2 list-decimal list-inside leading-relaxed">
-                        <li>Right-click and choose <strong class="text-slate-200">Inspect (Q)</strong>.</li>
-                        <li>Navigate to the <strong class="text-slate-200">Storage</strong> tab in the dev tools.</li>
-                        <li>Expand <strong class="text-slate-200">Local Storage</strong> in the left tree menu.</li>
-                        <li>Click on the domain to inspect or edit raw league JSON data in real-time.</li>
-                    </ol>
-                </div>
-            </div>
-
-            <!-- Live JSON Viewer Box -->
-            <div class="bg-slate-950/90 rounded-3xl border border-slate-800 p-6 space-y-4">
-                <div class="flex items-center justify-between">
+            <!-- Firebase Config Card -->
+            <div class="bg-slate-950/80 rounded-3xl border border-slate-800 p-6 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                     <div>
-                        <h3 class="font-bold text-white text-base">Live LocalStorage JSON Payload</h3>
-                        <p class="text-xs text-slate-400">Key: <code class="text-tennis-400 font-mono">shatin_big_league_v1</code></p>
+                        <h3 class="font-bold text-white text-base">Firebase Project Configuration</h3>
+                        <p class="text-xs text-slate-400">Paste your Firebase web app config JSON below or use default local mode.</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="copyStorageJSON()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700 flex items-center gap-1.5">
-                            <i class="fa-regular fa-copy"></i> Copy JSON
-                        </button>
+                    <span id="connection-status-badge" class="px-3 py-1 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Not Connected</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400 mb-1 block">apiKey</label>
+                        <input type="text" id="fb-apikey" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="AIzaSy...">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400 mb-1 block">authDomain</label>
+                        <input type="text" id="fb-authdomain" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="your-app.firebaseapp.com">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400 mb-1 block">projectId</label>
+                        <input type="text" id="fb-projectid" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="your-app-id">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400 mb-1 block">storageBucket</label>
+                        <input type="text" id="fb-storagebucket" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="your-app.appspot.com">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400 mb-1 block">messagingSenderId</label>
+                        <input type="text" id="fb-senderid" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="123456789">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-400 mb-1 block">appId</label>
+                        <input type="text" id="fb-appid" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500" placeholder="1:123:web:abc">
                     </div>
                 </div>
-                <div class="relative">
-                    <textarea id="storage-json-textarea" readonly class="w-full h-80 bg-slate-900 font-mono text-xs text-emerald-400 p-4 rounded-2xl border border-slate-800 focus:outline-none resize-none shadow-inner"></textarea>
+
+                <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800">
+                    <button onclick="saveFirebaseConfig()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-indigo-600/20 flex items-center gap-2">
+                        <i class="fa-solid fa-plug"></i> Connect & Sync
+                    </button>
                 </div>
             </div>
         </section>
 
     </main>
 
+    <!-- Score Input Modal -->
     <div id="score-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden transform transition-all">
             <div class="bg-gradient-to-r from-slate-950 to-slate-900 p-6 border-b border-slate-800 flex justify-between items-center">
@@ -329,10 +319,8 @@
                     </div>
                 </div>
 
-                <!-- Single Set Score Input -->
                 <div class="space-y-4">
-                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Single Set Score (e.g., 6-4, 8-6, 7-5)</div>
-                    
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Single Set Score (e.g., 6-4, 8-6)</div>
                     <div class="flex items-center justify-between bg-slate-950/40 p-4 rounded-xl border border-slate-800">
                         <span id="label-set-p1" class="text-sm font-medium text-slate-300 w-1/3 truncate">P1</span>
                         <div class="flex items-center space-x-3">
@@ -352,6 +340,7 @@
         </div>
     </div>
 
+    <!-- Player Modal -->
     <div id="player-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
             <div class="bg-gradient-to-r from-slate-950 to-slate-900 p-6 border-b border-slate-800 flex justify-between items-center">
@@ -372,6 +361,7 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 border border-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
         <div id="toast-icon" class="text-tennis-500 text-lg"><i class="fa-solid fa-circle-check"></i></div>
         <div>
@@ -380,7 +370,13 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by environment or custom config
         const defaultPlayers = [
             { id: 1, name: "Jason" },
             { id: 2, name: "Kiff" },
@@ -401,36 +397,90 @@
         ];
 
         let state = {
-            players: [],
+            players: JSON.parse(JSON.stringify(defaultPlayers)),
             matches: [],
             activeRound: 1
         };
 
-        function initLeague() {
-            const saved = localStorage.getItem('shatin_big_league_v1');
+        let db = null;
+        let auth = null;
+        let isCloudSynced = false;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shatin-big-league-v1';
+
+        window.initApp = async function() {
+            // Check if user saved custom firebase config in localStorage
+            let savedConfig = localStorage.getItem('shatin_fb_config');
+            let configToUse = null;
+
+            if (savedConfig) {
+                try {
+                    configToUse = JSON.parse(savedConfig);
+                } catch (e) {
+                    console.error("Invalid saved config");
+                }
+            } else if (typeof __firebase_config !== 'undefined') {
+                try {
+                    configToUse = JSON.parse(__firebase_config);
+                } catch (e) {}
+            }
+
+            if (configToUse && configToUse.apiKey) {
+                try {
+                    const app = initializeApp(configToUse);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    isCloudSynced = true;
+                    document.getElementById('sync-status-pill').innerHTML = `<i class="fa-solid fa-cloud text-emerald-400"></i> Live Cloud Sync`;
+                    document.getElementById('sync-status-pill').className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+                    document.getElementById('connection-status-badge').textContent = "Connected & Syncing";
+                    document.getElementById('connection-status-badge').className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+                    
+                    // Fill input fields
+                    document.getElementById('fb-apikey').value = configToUse.apiKey || '';
+                    document.getElementById('fb-authdomain').value = configToUse.authDomain || '';
+                    document.getElementById('fb-projectid').value = configToUse.projectId || '';
+                    document.getElementById('fb-storagebucket').value = configToUse.storageBucket || '';
+                    document.getElementById('fb-senderid').value = configToUse.messagingSenderId || '';
+                    document.getElementById('fb-appid').value = configToUse.appId || '';
+
+                    // Listen to Firestore
+                    setupFirestoreListener();
+                    return;
+                } catch (err) {
+                    console.error("Firebase init error:", err);
+                }
+            }
+
+            // Fallback to LocalStorage
+            loadLocalState();
+            renderAll();
+        };
+
+        function loadLocalState() {
+            const saved = localStorage.getItem('shatin_big_league_local_v1');
             if (saved) {
                 try {
                     state = JSON.parse(saved);
                 } catch (e) {
-                    console.error("Failed to parse local storage", e);
                     loadDefaults();
                 }
             } else {
                 loadDefaults();
             }
-            renderAll();
         }
 
         function loadDefaults() {
             state.players = JSON.parse(JSON.stringify(defaultPlayers));
             state.matches = generateRoundRobinSchedule(state.players);
             state.activeRound = 1;
-            saveState();
-        }
-
-        function saveState() {
-            localStorage.setItem('shatin_big_league_v1', JSON.stringify(state));
-            updateStorageViewer();
+            persistState();
         }
 
         function generateRoundRobinSchedule(playersList) {
@@ -461,42 +511,95 @@
             return matches;
         }
 
-        function switchTab(tabName) {
-            const tabs = ['standings', 'fixtures', 'players', 'results', 'storage'];
+        function setupFirestoreListener() {
+            if (!db) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'league_state');
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    state = docSnap.data();
+                    if (!state.matches || state.matches.length === 0) {
+                        state.matches = generateRoundRobinSchedule(state.players);
+                    }
+                    renderAll();
+                } else {
+                    loadDefaults();
+                    saveToCloud();
+                }
+            }, (error) => {
+                console.error("Firestore error:", error);
+                showToast("Cloud sync error. Falling back to offline mode.", "error");
+            });
+        }
+
+        window.persistState = async function() {
+            if (isCloudSynced && db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'league_state');
+                    await setDoc(docRef, state);
+                } catch (e) {
+                    console.error("Error writing to cloud:", e);
+                }
+            } else {
+                localStorage.setItem('shatin_big_league_local_v1', JSON.stringify(state));
+            }
+            renderAll();
+        }
+
+        window.saveFirebaseConfig = function() {
+            const cfg = {
+                apiKey: document.getElementById('fb-apikey').value.trim(),
+                authDomain: document.getElementById('fb-authdomain').value.trim(),
+                projectId: document.getElementById('fb-projectid').value.trim(),
+                storageBucket: document.getElementById('fb-storagebucket').value.trim(),
+                messagingSenderId: document.getElementById('fb-senderid').value.trim(),
+                appId: document.getElementById('fb-appid').value.trim()
+            };
+
+            if (!cfg.apiKey || !cfg.projectId) {
+                showToast("Please enter at least apiKey and projectId.", "error");
+                return;
+            }
+
+            localStorage.setItem('shatin_fb_config', JSON.stringify(cfg));
+            showToast("Firebase config saved! Reloading...", "success");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        };
+
+        window.switchTab = function(tabName) {
+            const tabs = ['standings', 'fixtures', 'players', 'results', 'sync'];
             tabs.forEach(t => {
                 document.getElementById(`view-${t}`).classList.add('hidden');
                 const navBtn = document.getElementById(`nav-${t}`);
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 " + (t === 'storage' ? 'text-amber-400' : '');
+                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 " + (t === 'sync' ? 'text-indigo-400' : '');
                 }
                 const mobBtn = document.getElementById(`mob-nav-${t}`);
                 if (mobBtn) {
-                    mobBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900 " + (t === 'storage' ? 'text-amber-400 bg-amber-500/10 border border-amber-500/30' : '');
+                    mobBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900 " + (t === 'sync' ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/30' : '');
                 }
             });
 
             document.getElementById(`view-${tabName}`).classList.remove('hidden');
             const activeNav = document.getElementById(`nav-${tabName}`);
             if (activeNav) {
-                if (tabName === 'storage') {
-                    activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-amber-500/20 text-amber-300 shadow-sm flex items-center gap-2 border border-amber-500/30";
+                if (tabName === 'sync') {
+                    activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-500/20 text-indigo-300 shadow-sm flex items-center gap-2 border border-indigo-500/30";
                 } else {
                     activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2";
                 }
             }
             const activeMob = document.getElementById(`mob-nav-${tabName}`);
             if (activeMob) {
-                if (tabName === 'storage') {
-                    activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                if (tabName === 'sync') {
+                    activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
                 } else {
                     activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white";
                 }
             }
-
-            if (tabName === 'storage') {
-                updateStorageViewer();
-            }
-        }
+        };
 
         function renderAll() {
             renderStandings();
@@ -505,7 +608,6 @@
             renderPlayers();
             renderResults();
             updateStatsBadge();
-            updateStorageViewer();
         }
 
         function calculateStandings() {
@@ -625,7 +727,7 @@
             }
         }
 
-        function changeActiveRound(val) {
+        window.changeActiveRound = function(val) {
             state.activeRound = parseInt(val);
             renderFixtures();
         }
@@ -731,55 +833,7 @@
             document.getElementById('stat-total-matches').textContent = `${completed} / 120`;
         }
 
-        function updateStorageViewer() {
-            const textarea = document.getElementById('storage-json-textarea');
-            if (textarea) {
-                textarea.value = JSON.stringify(state, null, 2);
-            }
-        }
-
-        function exportStorageJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "shatin_big_league_backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("League JSON backup downloaded!", "success");
-        }
-
-        function importStorageJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (parsed.players && parsed.matches) {
-                        state = parsed;
-                        saveState();
-                        renderAll();
-                        showToast("League successfully restored from backup!", "success");
-                    } else {
-                        showToast("Invalid backup file structure.", "error");
-                    }
-                } catch (err) {
-                    showToast("Failed to parse JSON file.", "error");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function copyStorageJSON() {
-            const textarea = document.getElementById('storage-json-textarea');
-            textarea.select();
-            document.execCommand('copy');
-            showToast("LocalStorage JSON copied to clipboard!", "success");
-        }
-
-        function openScoreModal(matchId) {
+        window.openScoreModal = function(matchId) {
             let m = state.matches.find(x => x.id === matchId);
             if (!m) return;
 
@@ -800,11 +854,11 @@
             document.getElementById('score-modal').classList.remove('hidden');
         }
 
-        function closeScoreModal() {
+        window.closeScoreModal = function() {
             document.getElementById('score-modal').classList.add('hidden');
         }
 
-        function saveMatchScore() {
+        window.saveMatchScore = function() {
             let matchId = document.getElementById('modal-match-id').value;
             let m = state.matches.find(x => x.id === matchId);
             if (!m) return;
@@ -826,13 +880,12 @@
             m.scoreP2 = scoreP2;
             m.completed = true;
 
-            saveState();
-            renderAll();
+            persistState();
             closeScoreModal();
-            showToast("Single-set match result saved!", "success");
+            showToast("Single-set match result saved & synced!", "success");
         }
 
-        function openPlayerModal(playerId) {
+        window.openPlayerModal = function(playerId) {
             let p = state.players.find(x => x.id === playerId);
             if (!p) return;
 
@@ -842,11 +895,11 @@
             document.getElementById('player-modal').classList.remove('hidden');
         }
 
-        function closePlayerModal() {
+        window.closePlayerModal = function() {
             document.getElementById('player-modal').classList.add('hidden');
         }
 
-        function savePlayerName() {
+        window.savePlayerName = function() {
             let id = parseInt(document.getElementById('edit-player-id').value);
             let newName = document.getElementById('edit-player-name').value.trim();
             if (!newName) {
@@ -857,14 +910,13 @@
             let p = state.players.find(x => x.id === id);
             if (p) {
                 p.name = newName;
-                saveState();
-                renderAll();
+                persistState();
                 closePlayerModal();
-                showToast("Player name updated!", "success");
+                showToast("Player name updated & synced!", "success");
             }
         }
 
-        function randomizePlayerNames() {
+        window.randomizePlayerNames = function() {
             const firstNames = ["Alexander", "Benjamin", "Christian", "Dominic", "Emil", "Felix", "Gabriel", "Hugo", "Ivan", "Julian", "Lucas", "Matteo", "Nathan", "Oliver", "Pablo", "Quentin", "Roman", "Sebastian", "Tristan", "Viktor"];
             const lastNames = ["Adams", "Baker", "Carter", "Davis", "Evans", "Foster", "Garcia", "Harris", "Ingram", "Jones", "King", "Lewis", "Moore", "Nelson", "Owens", "Parker", "Quinn", "Roberts", "Smith", "Taylor"];
 
@@ -882,12 +934,11 @@
                 pl.name = shuffledNames[idx];
             });
 
-            saveState();
-            renderAll();
+            persistState();
             showToast("Player names randomized!", "success");
         }
 
-        function simulateRemainingMatches() {
+        window.simulateRemainingMatches = function() {
             const possibleScores = [
                 {w: 6, l: 0}, {w: 6, l: 1}, {w: 6, l: 2}, {w: 6, l: 3}, {w: 6, l: 4}, {w: 7, l: 5}, {w: 7, l: 6},
                 {w: 8, l: 6}, {w: 9, l: 7}, {w: 8, l: 5}, {w: 9, l: 8}
@@ -900,22 +951,21 @@
                     m.scoreP1 = p1Wins ? scoreObj.w : scoreObj.l;
                     m.scoreP2 = p1Wins ? scoreObj.l : scoreObj.w;
                     if (m.scoreP1 === m.scoreP2) {
-                        m.scoreP1 += 1; // prevent tie
+                        m.scoreP1 += 1;
                     }
                     m.completed = true;
                 }
             });
 
-            saveState();
-            renderAll();
+            persistState();
             showToast("All remaining single-set matches simulated!", "success");
         }
 
-        function confirmResetData() {
+        window.confirmResetData = function() {
             if (confirm("Are you sure you want to reset the entire league? All scores and stats will be cleared.")) {
                 loadDefaults();
-                renderAll();
-                showToast("League has been reset to default.", "info");
+                persistState();
+                showToast("League has been reset.", "info");
             }
         }
 
@@ -940,7 +990,7 @@
         }
 
         window.onload = function() {
-            initLeague();
+            window.initApp();
         };
     </script>
 </body>
