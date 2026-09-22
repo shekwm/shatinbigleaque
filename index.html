@@ -43,7 +43,7 @@
       </div>
 
       <nav class="hidden md:flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-        <button id="nav-standings" onclick="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2"><i class="fa-solid fa-ranking-star"></i> Standings</button>
+        <button id="nav-standings" onclick="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2"><i class="fa-solid fa-trophy"></i> Standings</button>
         <button id="nav-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> Fixtures</button>
         <button id="nav-results" onclick="switchTab('results')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-square-poll-vertical"></i> Results</button>
         <button id="nav-players" onclick="switchTab('players')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-users"></i> Players</button>
@@ -192,7 +192,7 @@
             <input id="fb-appid" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
           </div>
           <div class="pt-4">
-            <button onclick="saveFirebaseConfig()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Firebase Settings</button>
+            <button onclick="saveFirebaseConfig()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2"><i class="fa-solid fa-floppy-disk"></i> Save Firebase Config</button>
           </div>
         </div>
       </div>
@@ -289,6 +289,8 @@
     ];
 
     const QUICK_ACTION_PASSWORD = 'Sammi';
+    const FIREBASE_CONFIG_KEY = 'shatin_fb_config';
+    const FIREBASE_DOC_ID = 'shatin-big-league';
 
     let state = {
       players: JSON.parse(JSON.stringify(defaultPlayers)),
@@ -313,16 +315,40 @@
       measurementId: 'G-NTLY03L3WY'
     };
 
+    function populateFirebaseForm(cfg = getSavedFirebaseConfig()) {
+      const mapping = [
+        ['fb-apikey', cfg.apiKey || ''],
+        ['fb-authdomain', cfg.authDomain || ''],
+        ['fb-projectid', cfg.projectId || ''],
+        ['fb-storagebucket', cfg.storageBucket || ''],
+        ['fb-senderid', cfg.messagingSenderId || ''],
+        ['fb-appid', cfg.appId || '']
+      ];
+
+      mapping.forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+      });
+    }
+
     function getSavedFirebaseConfig() {
       try {
-        const saved = localStorage.getItem('shatin_fb_config');
-        if (!saved) return defaultFirebaseConfig;
+        const saved = localStorage.getItem(FIREBASE_CONFIG_KEY);
+        if (!saved) return { ...defaultFirebaseConfig };
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+        if (parsed && parsed.apiKey && parsed.projectId) return { ...defaultFirebaseConfig, ...parsed };
       } catch (e) {
         console.warn('Bad Firebase config in localStorage, using defaults');
       }
-      return defaultFirebaseConfig;
+      return { ...defaultFirebaseConfig };
+    }
+
+    function setSyncFailure(message, silent = false) {
+      updateSyncStatus(false, 'Sync Failed');
+      if (!silent) {
+        showToast(message, 'error');
+      }
+      console.warn(message);
     }
 
     function updateSyncStatus(isConnected, label) {
@@ -348,18 +374,18 @@
 
     function initializeFirebaseSync() {
       if (!window.firebase || !window.firebase.firestore) {
-        updateSyncStatus(false, 'Offline Mode');
+        setSyncFailure('Firebase SDK failed to load. Please refresh the page.', true);
         return;
       }
 
       const cfg = getSavedFirebaseConfig();
       if (!cfg.apiKey || !cfg.projectId) {
-        updateSyncStatus(false, 'Offline Mode');
+        setSyncFailure('Add your Firebase API key and Project ID to enable sync.', true);
         return;
       }
 
       try {
-        if (!firebase.apps.length) {
+        if (!firebase.apps || !firebase.apps.length) {
           firebase.initializeApp(cfg);
         }
 
@@ -369,7 +395,7 @@
           firebaseUnsubscribe();
         }
 
-        const leagueDoc = firebaseDb.collection('leagues').doc('shatin-big-league');
+        const leagueDoc = firebaseDb.collection('leagues').doc(FIREBASE_DOC_ID);
 
         firebaseUnsubscribe = leagueDoc.onSnapshot(
           (docSnapshot) => {
@@ -389,14 +415,14 @@
           },
           (error) => {
             console.error('Firestore snapshot error:', error);
-            updateSyncStatus(false, 'Firebase Error');
+            setSyncFailure('Firebase sync failed. Check your Firestore rules and project settings.', false);
           }
         );
 
         syncStateToFirebase();
       } catch (error) {
         console.error('Firebase initialization failed:', error);
-        updateSyncStatus(false, 'Firebase Error');
+        setSyncFailure('Firebase app initialization failed. Please verify your project config.', false);
       }
     }
 
@@ -406,7 +432,7 @@
       }
 
       try {
-        const leagueDoc = firebaseDb.collection('leagues').doc('shatin-big-league');
+        const leagueDoc = firebaseDb.collection('leagues').doc(FIREBASE_DOC_ID);
         await leagueDoc.set({
           players: state.players,
           matches: state.matches,
@@ -419,7 +445,7 @@
       } catch (error) {
         console.error('Firebase sync failed:', error);
         isCloudSynced = false;
-        updateSyncStatus(false, 'Sync Failed');
+        setSyncFailure('Firebase sync failed. Make sure Firestore is enabled and your rules allow writes.', false);
       }
     }
 
@@ -671,7 +697,7 @@
             <div class="w-5/12 text-left font-bold text-white text-base truncate" title="${p2.name}">${p2.name}</div>
           </div>
           <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-end">
-            <button onclick="openScoreModal('${m.id}')" class="px-4 py-2 bg-slate-900 hover:bg-tennis-600 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition border border-slate-700 flex items-center gap-2">
+            <button onclick="openScoreModal('${m.id}')" class="px-4 py-2 bg-slate-900 hover:bg-tennis-600 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition border border-slate-700">
               <i class="fa-solid fa-pen-to-square"></i> ${m.completed ? 'Edit Score' : 'Enter Score'}
             </button>
           </div>
@@ -882,8 +908,8 @@
     }
 
     function randomizePlayerNames() {
-      const firstNames = ['Alexander', 'Benjamin', 'Christian', 'Dominic', 'Emil', 'Felix', 'Gabriel', 'Hugo', 'Ivan', 'Julian', 'Lucas', 'Matteo', 'Nathan', 'Oliver', 'Pablo', 'Quentin', 'Roman', 'Sebastian', 'Theo', 'Ulrich', 'Victor', 'William'];
-      const lastNames = ['Adams', 'Baker', 'Carter', 'Davis', 'Evans', 'Foster', 'Garcia', 'Harris', 'Ingram', 'Jones', 'King', 'Lewis', 'Moore', 'Nelson', 'Owens', 'Parker', 'Quinn', 'Roberts', 'Stewart', 'Turner', 'Walker'];
+      const firstNames = ['Alexander', 'Benjamin', 'Christian', 'Dominic', 'Emil', 'Felix', 'Gabriel', 'Hugo', 'Ivan', 'Julian', 'Lucas', 'Matteo', 'Nathan', 'Oliver', 'Pablo', 'Quentin', 'Roman', 'Sebastian', 'Theo', 'Ulrich', 'Victor', 'William', 'Xavier', 'Yann', 'Zach'];
+      const lastNames = ['Adams', 'Baker', 'Carter', 'Davis', 'Evans', 'Foster', 'Garcia', 'Harris', 'Ingram', 'Jones', 'King', 'Lewis', 'Moore', 'Nelson', 'Owens', 'Parker', 'Quinn', 'Roberts', 'Stewart', 'Taylor', 'Underwood', 'Vega', 'Walker', 'Young', 'Zimmer'];
       const shuffledNames = [];
 
       while (shuffledNames.length < state.players.length) {
@@ -947,12 +973,10 @@
         return;
       }
 
-      localStorage.setItem('shatin_fb_config', JSON.stringify(cfg));
-      showToast('Firebase config saved! Reloading...', 'success');
-      setTimeout(() => {
-        initializeFirebaseSync();
-        window.location.reload();
-      }, 700);
+      localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(cfg));
+      populateFirebaseForm(cfg);
+      showToast('Firebase config saved. Syncing...', 'success');
+      initializeFirebaseSync();
     }
 
     window.switchTab = switchTab;
@@ -973,6 +997,7 @@
     window.persistState = persistState;
 
     function initApp() {
+      populateFirebaseForm();
       loadLocalState();
       renderAll();
       switchTab('standings');
