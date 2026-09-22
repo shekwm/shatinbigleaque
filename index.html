@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shatin Big League</title>
+    <title>Shatin Big League V010</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -34,8 +34,8 @@
                     <i class="fa-solid fa-table-tennis-paddle-ball"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white tracking-wide">Shatin Big League</h1>
-                    <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-bold text-white tracking-wide">Shatin Big League <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-tennis-500/20 text-tennis-400 border border-tennis-500/30">V010</span></h1>
+                    <div class="flex items-center gap-2 mt-0.5">
                         <span id="sync-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
                             <i class="fa-solid fa-hard-drive"></i> Local Storage Only
                         </span>
@@ -464,7 +464,6 @@
                     if (!state.matches || state.matches.length === 0) {
                         state.matches = generateRoundRobinSchedule(state.players);
                     } else {
-                        // Ensure legacy match records have tie-break fields if loaded from storage
                         state.matches.forEach(m => {
                             if (m.tbP1 === undefined) m.tbP1 = null;
                             if (m.tbP2 === undefined) m.tbP2 = null;
