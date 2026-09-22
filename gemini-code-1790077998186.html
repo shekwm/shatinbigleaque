@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sha Tin Big League</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .data-preview {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-top: 15px;
+            border-radius: 4px;
+            max-height: 350px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sha Tin Big League Tournament</h1>
+    <p>Automatically syncing tournament data from Google Drive...</p>
+    
+    <div id="status">Connecting to Google Drive...</div>
+    <div id="content" class="data-preview"></div>
+
+    <script>
+        // Your Google Drive File ID
+        const FILE_ID = '12o5_dZvW6pafe7ufzXvkyZBqW9gsRN4Q-QveF6041hM';[cite: 1]
+
+        // Public Google Drive download endpoint
+        const DRIVE_URL = `https://drive.google.com/uc?export=download&id=${FILE_ID}`;
+
+        // Global tournament state object
+        let tournamentData = {
+          "players": [],
+          "matches": [],
+          "activeRound": 1
+        };
+
+        // Automatically fetch data when the window loads
+        window.onload = async () => {
+            try {
+                const response = await fetch(DRIVE_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch file. HTTP status: ${response.status}`);
+                }
+
+                tournamentData = await response.json();
+                
+                // Update UI with successfully loaded data
+                document.getElementById('status').innerText = 
+                    `Successfully loaded data from Google Drive! (${tournamentData.players.length} players, ${tournamentData.matches.length} matches)`;
+                
+                document.getElementById('content').innerText = JSON.stringify(tournamentData, null, 2);
+
+            } catch (error) {
+                console.error("Error fetching data from Google Drive:", error);
+                document.getElementById('status').innerText = "Error: Could not load data automatically. Make sure the file sharing settings are set to 'Anyone with the link can view'.";
+            }
+        };
+    </script>
+</body>
+</html>
