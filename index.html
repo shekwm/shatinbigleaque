@@ -18,37 +18,13 @@
             let tbP1 = rawTBP1 === '' ? null : Number(rawTBP1);
             let tbP2 = rawTBP2 === '' ? null : Number(rawTBP2);
 
-            if ((scoreP1 === 6 && scoreP2 === 6) || (scoreP1 === 7 && scoreP2 === 6) || (scoreP1 === 6 && scoreP2 === 7)) {
-                if (tbP1 === null || tbP2 === null) {
-                    showToast("A tie-break score is required when the set reaches 6-6.", "error");
-                    return;
-                }
-
-                const winner = scoreP1 > scoreP2 ? { games: scoreP1, tb: tbP1 } : { games: scoreP2, tb: tbP2 };
-                const loser = scoreP1 > scoreP2 ? { games: scoreP2, tb: tbP2 } : { games: scoreP1, tb: tbP1 };
-
-                if (winner.tb < 7 || Math.abs(winner.tb - loser.tb) < 2) {
-                    showToast("Tie-break winner must reach at least 7 points and lead by 2.", "error");
-                    return;
-                }
-
-                if (scoreP1 > scoreP2) {
-                    scoreP1 = 7;
-                    scoreP2 = 6;
-                } else {
-                    scoreP1 = 6;
-                    scoreP2 = 7;
-                }
-            } else if (scoreP1 === scoreP2) {
-                showToast("Tennis matches cannot end in a tie. One player must win more games.", "error");
-                return;
-            } else if (Math.min(scoreP1, scoreP2) < 0 || Math.max(scoreP1, scoreP2) > 15) {
-                showToast("Set scores must be between 0 and 15.", "error");
+            if (!Number.isFinite(scoreP1) || !Number.isFinite(scoreP2)) {
+                showToast("Scores must be valid numbers.", "error");
                 return;
             }
 
-            if (Math.max(scoreP1, scoreP2) >= 7 && Math.abs(scoreP1 - scoreP2) < 2) {
-                showToast("If a set goes to 7+, the winner must lead by at least 2 games (for example 7-5 or 7-6).", "error");
+            if ((tbP1 !== null && !Number.isFinite(tbP1)) || (tbP2 !== null && !Number.isFinite(tbP2))) {
+                showToast("Tie-break values must be valid numbers when provided.", "error");
                 return;
             }
 
