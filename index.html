@@ -236,6 +236,20 @@
                         <input id="set-p2" type="number" min="0" max="15" class="w-full bg-slate-950 border border-slate-700 text-center text-xl font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500">
                     </div>
                 </div>
+
+                <div class="mt-4 border-t border-slate-800 pt-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Tie-break score (only for 6-6)</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label id="label-tb-p1" class="block text-xs font-bold text-slate-400 truncate mb-1">P1 TB Points</label>
+                            <input id="tb-p1" type="number" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 text-center text-lg font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500" placeholder="7">
+                        </div>
+                        <div>
+                            <label id="label-tb-p2" class="block text-xs font-bold text-slate-400 truncate mb-1">P2 TB Points</label>
+                            <input id="tb-p2" type="number" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 text-center text-lg font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500" placeholder="5">
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="flex items-center gap-3 pt-2">
                 <button onclick="closeScoreModal()" class="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">Cancel</button>
@@ -435,6 +449,8 @@
                             p2Id: player2.id,
                             scoreP1: null,
                             scoreP2: null,
+                            tiebreakP1: null,
+                            tiebreakP2: null,
                             completed: false
                         });
                     }
@@ -678,6 +694,22 @@
             renderFixtures();
         };
 
+        function formatSetScore(match) {
+            if (!match || match.scoreP1 === null || match.scoreP2 === null) return '—';
+            const p1 = Number(match.scoreP1);
+            const p2 = Number(match.scoreP2);
+            const tb1 = match.tiebreakP1 !== null && match.tiebreakP1 !== undefined ? Number(match.tiebreakP1) : null;
+            const tb2 = match.tiebreakP2 !== null && match.tiebreakP2 !== undefined ? Number(match.tiebreakP2) : null;
+
+            if (tb1 !== null && tb2 !== null && p1 === 7 && p2 === 6) {
+                return `${p1}-${p2} (${tb1}-${tb2})`;
+            }
+            if (tb1 !== null && tb2 !== null && p1 === 6 && p2 === 7) {
+                return `${p1}-${p2} (${tb1}-${tb2})`;
+            }
+            return `${p1}-${p2}`;
+        }
+
         function renderFixtures() {
             const container = document.getElementById('fixtures-container');
             if (!container) return;
@@ -694,7 +726,7 @@
                     : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming</span>`;
 
                 let scoreDisplay = m.completed
-                    ? `<div class="font-black text-tennis-400 text-base">${m.scoreP1} - ${m.scoreP2}</div>`
+                    ? `<div class="font-black text-tennis-400 text-base">${formatSetScore(m)}</div>`
                     : `<span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">VS</span>`;
 
                 let card = document.createElement('div');
@@ -766,7 +798,7 @@
                 tr.innerHTML = `
                     <td class="py-4 px-6 font-bold text-tennis-400">Round ${m.round}</td>
                     <td class="py-4 px-6 text-right font-bold text-white">${p1.name}</td>
-                    <td class="py-4 px-4 text-center font-black text-white bg-slate-900/50">${m.scoreP1} - ${m.scoreP2}</td>
+                    <td class="py-4 px-4 text-center font-black text-white bg-slate-900/50">${formatSetScore(m)}</td>
                     <td class="py-4 px-6 font-bold text-white">${p2.name}</td>
                     <td class="py-4 px-6 text-center"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">Final</span></td>
                     <td class="py-4 px-6 text-center">
@@ -800,9 +832,13 @@
 
             document.getElementById('label-set-p1').textContent = p1.name;
             document.getElementById('label-set-p2').textContent = p2.name;
+            document.getElementById('label-tb-p1').textContent = `${p1.name} TB`;
+            document.getElementById('label-tb-p2').textContent = `${p2.name} TB`;
 
             document.getElementById('set-p1').value = m.scoreP1 !== null ? m.scoreP1 : '';
             document.getElementById('set-p2').value = m.scoreP2 !== null ? m.scoreP2 : '';
+            document.getElementById('tb-p1').value = m.tiebreakP1 !== null ? m.tiebreakP1 : '';
+            document.getElementById('tb-p2').value = m.tiebreakP2 !== null ? m.tiebreakP2 : '';
 
             document.getElementById('score-modal').classList.remove('hidden');
         };
@@ -818,6 +854,8 @@
 
             let rawP1 = document.getElementById('set-p1').value.trim();
             let rawP2 = document.getElementById('set-p2').value.trim();
+            let rawTBP1 = document.getElementById('tb-p1').value.trim();
+            let rawTBP2 = document.getElementById('tb-p2').value.trim();
 
             if (rawP1 === '' || rawP2 === '' || isNaN(Number(rawP1)) || isNaN(Number(rawP2))) {
                 showToast("Please enter valid game scores for both players.", "error");
@@ -826,14 +864,47 @@
 
             let scoreP1 = Number(rawP1);
             let scoreP2 = Number(rawP2);
+            let tbP1 = rawTBP1 === '' ? null : Number(rawTBP1);
+            let tbP2 = rawTBP2 === '' ? null : Number(rawTBP2);
 
-            if (scoreP1 === scoreP2) {
+            if ((scoreP1 === 6 && scoreP2 === 6) || (scoreP1 === 7 && scoreP2 === 6) || (scoreP1 === 6 && scoreP2 === 7)) {
+                if (tbP1 === null || tbP2 === null) {
+                    showToast("A tie-break score is required when the set reaches 6-6.", "error");
+                    return;
+                }
+
+                const winner = scoreP1 > scoreP2 ? { games: scoreP1, tb: tbP1 } : { games: scoreP2, tb: tbP2 };
+                const loser = scoreP1 > scoreP2 ? { games: scoreP2, tb: tbP2 } : { games: scoreP1, tb: tbP1 };
+
+                if (winner.tb < 7 || Math.abs(winner.tb - loser.tb) < 2) {
+                    showToast("Tie-break winner must reach at least 7 points and lead by 2.", "error");
+                    return;
+                }
+
+                if (scoreP1 > scoreP2) {
+                    scoreP1 = 7;
+                    scoreP2 = 6;
+                } else {
+                    scoreP1 = 6;
+                    scoreP2 = 7;
+                }
+            } else if (scoreP1 === scoreP2) {
                 showToast("Tennis matches cannot end in a tie. One player must win more games.", "error");
+                return;
+            } else if (Math.min(scoreP1, scoreP2) < 0 || Math.max(scoreP1, scoreP2) > 15) {
+                showToast("Set scores must be between 0 and 15.", "error");
+                return;
+            }
+
+            if ((scoreP1 >= 7 || scoreP2 >= 7) && Math.abs(scoreP1 - scoreP2) !== 1) {
+                showToast("If a set goes to 7+, it must be a one-game advantage (for example 7-5 or 7-6).", "error");
                 return;
             }
 
             m.scoreP1 = scoreP1;
             m.scoreP2 = scoreP2;
+            m.tiebreakP1 = tbP1;
+            m.tiebreakP2 = tbP2;
             m.completed = true;
 
             persistState();
@@ -913,6 +984,8 @@
                     if (m.scoreP1 === m.scoreP2) {
                         m.scoreP1 += 1;
                     }
+                    m.tiebreakP1 = null;
+                    m.tiebreakP2 = null;
                     m.completed = true;
                 }
             });
