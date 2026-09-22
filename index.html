@@ -50,7 +50,7 @@
                 <button id="nav-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> Fixtures</button>
                 <button id="nav-results" onclick="switchTab('results')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-square-poll-vertical"></i> Results</button>
                 <button id="nav-players" onclick="switchTab('players')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-users"></i> Players</button>
-                <button id="nav-sync" onclick="switchTab('sync')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up"></i> Sync Config</button>
+                <button id="nav-sync" onclick="switchTab('sync')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up"></i> Sync</button>
             </nav>
         </div>
 
@@ -87,7 +87,7 @@
                 <div>
                     <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Quick Actions</div>
                     <div class="flex items-center gap-2 mt-1">
-                        <button onclick="simulateRemainingMatches()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">Simulate All</button>
+                        <button onclick="simulateRemainingMatches()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">Simulate</button>
                         <button onclick="confirmResetData()" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-400 rounded-lg border border-rose-500/30 transition">Reset</button>
                     </div>
                 </div>
@@ -296,6 +296,8 @@
             { id: 16, name: "Player 16" }
         ];
 
+        const QUICK_ACTION_PASSWORD = 'Sammi';
+
         let state = {
             players: JSON.parse(JSON.stringify(defaultPlayers)),
             matches: [],
@@ -316,6 +318,20 @@
             appId: "1:460883073764:web:81b774a1f1a769b8f56af1",
             measurementId: "G-NTLY03L3WY"
         };
+
+        function requireQuickActionPassword(actionLabel) {
+            const entered = window.prompt(`Enter password to ${actionLabel}:`);
+            if (entered === null) {
+                return false;
+            }
+
+            if (entered !== QUICK_ACTION_PASSWORD) {
+                showToast(`Incorrect password. ${actionLabel} cancelled.`, 'error');
+                return false;
+            }
+
+            return true;
+        }
 
         window.initApp = async function() {
             let savedConfig = localStorage.getItem('shatin_fb_config');
@@ -496,7 +512,7 @@
 
                 const navBtn = document.getElementById(`nav-${t}`);
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 " + (t === 'sync' ? 'text-indigo-400' : '');
+                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 " + (t === 'sync' ? 'text-indigo-400 hover:text-white hover:bg-slate-800' : '');
                 }
 
                 const mobBtn = document.getElementById(`mob-nav-${t}`);
@@ -677,7 +693,7 @@
                 let p2 = state.players.find(pl => pl.id === m.p2Id) || { name: "Unknown" };
 
                 let statusBadge = m.completed 
-                    ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Completed</span>`
+                    ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Complete</span>`
                     : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming</span>`;
 
                 let scoreDisplay = m.completed
@@ -697,7 +713,7 @@
                         <div class="w-5/12 text-left font-bold text-white text-base truncate" title="${p2.name}">${p2.name}</div>
                     </div>
                     <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-end">
-                        <button onclick="openScoreModal('${m.id}')" class="px-4 py-2 bg-slate-900 hover:bg-tennis-600 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition border border-slate-700 flex items-center gap-2">
+                        <button onclick="openScoreModal('${m.id}')" class="px-4 py-2 bg-slate-900 hover:bg-tennis-600 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition border border-slate-700">
                             <i class="fa-solid fa-pen-to-square"></i> ${m.completed ? 'Edit Score' : 'Enter Score'}
                         </button>
                     </div>
@@ -757,7 +773,9 @@
                     <td class="py-4 px-6 font-bold text-white">${p2.name}</td>
                     <td class="py-4 px-6 text-center"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">Final</span></td>
                     <td class="py-4 px-6 text-center">
-                        <button onclick="openScoreModal('${m.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700">Edit</button>
+                        <button onclick="openScoreModal('${m.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700">
+                            Edit
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -858,8 +876,8 @@
         };
 
         window.randomizePlayerNames = function() {
-            const firstNames = ["Alexander", "Benjamin", "Christian", "Dominic", "Emil", "Felix", "Gabriel", "Hugo", "Ivan", "Julian", "Lucas", "Matteo", "Nathan", "Oliver", "Pablo", "Quentin", "Roman", "Sebastian", "Tristan", "Viktor"];
-            const lastNames = ["Adams", "Baker", "Carter", "Davis", "Evans", "Foster", "Garcia", "Harris", "Ingram", "Jones", "King", "Lewis", "Moore", "Nelson", "Owens", "Parker", "Quinn", "Roberts", "Smith", "Taylor"];
+            const firstNames = ["Alexander", "Benjamin", "Christian", "Dominic", "Emil", "Felix", "Gabriel", "Hugo", "Ivan", "Julian", "Lucas", "Matteo", "Nathan", "Oliver", "Pablo", "Quentin", "Roman", "Sebastian", "Theo", "Ulysses", "Victor", "Wesley", "Xavier", "Yusuf", "Zachary"];
+            const lastNames = ["Adams", "Baker", "Carter", "Davis", "Evans", "Foster", "Garcia", "Harris", "Ingram", "Jones", "King", "Lewis", "Moore", "Nelson", "Owens", "Parker", "Quinn", "Roberts", "Smith", "Turner", "Underwood", "Vaughn", "Walker", "Young", "Zimmerman"];
 
             let shuffledNames = [];
             while (shuffledNames.length < state.players.length) {
@@ -880,6 +898,10 @@
         };
 
         window.simulateRemainingMatches = function() {
+            if (!requireQuickActionPassword('simulate remaining matches')) {
+                return;
+            }
+
             const possibleScores = [
                 {w: 6, l: 0}, {w: 6, l: 1}, {w: 6, l: 2}, {w: 6, l: 3}, {w: 6, l: 4}, {w: 7, l: 5}, {w: 7, l: 6},
                 {w: 8, l: 6}, {w: 9, l: 7}, {w: 8, l: 5}, {w: 9, l: 8}
@@ -903,6 +925,10 @@
         };
 
         window.confirmResetData = function() {
+            if (!requireQuickActionPassword('reset the league')) {
+                return;
+            }
+
             if (confirm("Are you sure you want to reset the entire league? All scores and stats will be cleared.")) {
                 loadDefaults();
                 persistState();
