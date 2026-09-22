@@ -43,7 +43,7 @@
       </div>
 
       <nav class="hidden md:flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
-        <button id="nav-standings" onclick="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2"><i class="fa-solid fa-trophy"></i> Standings</button>
+        <button id="nav-standings" onclick="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2"><i class="fa-solid fa-ranking-star"></i> Standings</button>
         <button id="nav-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> Fixtures</button>
         <button id="nav-results" onclick="switchTab('results')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-square-poll-vertical"></i> Results</button>
         <button id="nav-players" onclick="switchTab('players')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-users"></i> Players</button>
@@ -82,7 +82,7 @@
         <div>
           <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Quick Actions</div>
           <div class="flex items-center gap-2 mt-1">
-            <button onclick="simulateRemainingMatches()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">Simulate</button>
+            <button onclick="simulateRemainingMatches()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">Simulate Remaining</button>
             <button onclick="confirmResetData()" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-400 rounded-lg border border-rose-500/30 transition">Reset</button>
           </div>
         </div>
@@ -677,7 +677,7 @@
         const p1 = state.players.find((pl) => pl.id === m.p1Id) || { name: 'Unknown' };
         const p2 = state.players.find((pl) => pl.id === m.p2Id) || { name: 'Unknown' };
         const statusBadge = m.completed
-          ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Complete</span>'
+          ? '<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Completed</span>'
           : '<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming</span>';
 
         const scoreDisplay = m.completed
@@ -722,7 +722,7 @@
               <div class="text-xs text-slate-400">Player ID #${pl.id}</div>
             </div>
           </div>
-          <button onclick="openPlayerModal(${pl.id})" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition border border-slate-700"><i class="fa-solid fa-pen"></i></button>
+          <button onclick="openPlayerModal(${pl.id})" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition border border-slate-700"><i class="fa-solid fa-pencil"></i></button>
         `;
         grid.appendChild(card);
       });
@@ -908,8 +908,8 @@
     }
 
     function randomizePlayerNames() {
-      const firstNames = ['Alexander', 'Benjamin', 'Christian', 'Dominic', 'Emil', 'Felix', 'Gabriel', 'Hugo', 'Ivan', 'Julian', 'Lucas', 'Matteo', 'Nathan', 'Oliver', 'Pablo', 'Quentin', 'Roman', 'Sebastian', 'Theo', 'Ulrich', 'Victor', 'William', 'Xavier', 'Yann', 'Zach'];
-      const lastNames = ['Adams', 'Baker', 'Carter', 'Davis', 'Evans', 'Foster', 'Garcia', 'Harris', 'Ingram', 'Jones', 'King', 'Lewis', 'Moore', 'Nelson', 'Owens', 'Parker', 'Quinn', 'Roberts', 'Stewart', 'Taylor', 'Underwood', 'Vega', 'Walker', 'Young', 'Zimmer'];
+      const firstNames = ['Alexander', 'Benjamin', 'Christian', 'Dominic', 'Emil', 'Felix', 'Gabriel', 'Hugo', 'Ivan', 'Julian', 'Lucas', 'Matteo', 'Nathan', 'Oliver', 'Pablo', 'Quentin', 'Roman', 'Sebastian', 'Theo', 'Uriel', 'Victor', 'Wesley', 'Xavier', 'Yusuf', 'Zach'];
+      const lastNames = ['Adams', 'Baker', 'Carter', 'Davis', 'Evans', 'Foster', 'Garcia', 'Harris', 'Ingram', 'Jones', 'King', 'Lewis', 'Moore', 'Nelson', 'Owens', 'Parker', 'Quinn', 'Roberts', 'Stewart', 'Turner', 'Underwood', 'Vega', 'Walker', 'Young', 'Zimmer'];
       const shuffledNames = [];
 
       while (shuffledNames.length < state.players.length) {
@@ -997,14 +997,17 @@
     window.persistState = persistState;
 
     function initApp() {
-      populateFirebaseForm();
       loadLocalState();
       renderAll();
+      populateFirebaseForm();
       switchTab('standings');
-      initializeFirebaseSync();
+      updateSyncStatus(false, 'Offline Mode');
+      if (window.firebase && window.firebase.firestore) {
+        initializeFirebaseSync();
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', initApp);
+    initApp();
   </script>
 </body>
 </html>
