@@ -79,7 +79,7 @@
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 flex items-center justify-between">
                 <div>
                     <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Scoring System</div>
-                    <div class="text-sm font-bold text-slate-200 mt-1">Games Won + 3 Completion Pts</div>
+                    <div class="text-sm font-bold text-slate-200 mt-1">Games Won + 3 Pts + (6-0 Bonus)</div>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-slate-900 text-tennis-400 flex items-center justify-center border border-slate-800"><i class="fa-solid fa-calculator"></i></div>
             </div>
@@ -225,18 +225,22 @@
             <input type="hidden" id="modal-match-id">
             <div class="py-2">
                 <div class="flex items-center justify-between text-sm font-bold text-slate-300 mb-4">
-                    <span id="modal-p1-name" class="w-5/12 truncate">Player 1</span>
+                    <span id="modal-p1-name" class="w-4/12 truncate">Player 1</span>
                     <span class="text-xs text-slate-500 font-bold uppercase">VS</span>
-                    <span id="modal-p2-name" class="w-5/12 text-right truncate">Player 2</span>
+                    <span id="modal-p2-name" class="w-4/12 text-right truncate">Player 2</span>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label id="label-set-p1" class="block text-xs font-bold text-slate-400 truncate mb-1">P1 Games</label>
-                        <input id="set-p1" type="number" min="0" max="15" class="w-full bg-slate-950 border border-slate-700 text-center text-xl font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500">
+                        <input id="set-p1" type="number" min="0" max="15" class="w-full bg-slate-950 border border-slate-700 text-center text-xl font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500 mb-2" placeholder="Games">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tie-break (optional)</label>
+                        <input id="tb-p1" type="number" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 text-center text-sm font-bold text-slate-300 py-1.5 rounded-xl focus:outline-none focus:border-tennis-500" placeholder="TB pts">
                     </div>
                     <div>
                         <label id="label-set-p2" class="block text-xs font-bold text-slate-400 truncate mb-1">P2 Games</label>
-                        <input id="set-p2" type="number" min="0" max="15" class="w-full bg-slate-950 border border-slate-700 text-center text-xl font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500">
+                        <input id="set-p2" type="number" min="0" max="15" class="w-full bg-slate-950 border border-slate-700 text-center text-xl font-bold text-white py-2 rounded-xl focus:outline-none focus:border-tennis-500 mb-2" placeholder="Games">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Tie-break (optional)</label>
+                        <input id="tb-p2" type="number" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 text-center text-sm font-bold text-slate-300 py-1.5 rounded-xl focus:outline-none focus:border-tennis-500" placeholder="TB pts">
                     </div>
                 </div>
             </div>
@@ -438,6 +442,8 @@
                             p2Id: player2.id,
                             scoreP1: null,
                             scoreP2: null,
+                            tbP1: null,
+                            tbP2: null,
                             completed: false
                         });
                     }
@@ -457,6 +463,12 @@
                     state = docSnap.data();
                     if (!state.matches || state.matches.length === 0) {
                         state.matches = generateRoundRobinSchedule(state.players);
+                    } else {
+                        // Ensure legacy match records have tie-break fields if loaded from storage
+                        state.matches.forEach(m => {
+                            if (m.tbP1 === undefined) m.tbP1 = null;
+                            if (m.tbP2 === undefined) m.tbP2 = null;
+                        });
                     }
                     renderAll();
                 } else {
@@ -587,8 +599,11 @@
                 p2.gamesWon += scoreP2;
                 p2.gamesLost += scoreP1;
 
-                p1.points += (3 + scoreP1);
-                p2.points += (3 + scoreP2);
+                let bonusP1 = (scoreP1 === 6 && scoreP2 === 0) ? 2 : 0;
+                let bonusP2 = (scoreP2 === 6 && scoreP1 === 0) ? 2 : 0;
+
+                p1.points += (3 + scoreP1 + bonusP1);
+                p2.points += (3 + scoreP2 + bonusP2);
 
                 if (scoreP1 > scoreP2) {
                     p1.won++;
@@ -697,7 +712,7 @@
                     : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming</span>`;
 
                 let scoreDisplay = m.completed
-                    ? `<div class="font-black text-tennis-400 text-base">${m.scoreP1} - ${m.scoreP2}</div>`
+                    ? `<div class="font-black text-tennis-400 text-base">${m.scoreP1} - ${m.scoreP2}${ (m.tbP1 !== null && m.tbP1 !== '' && m.tbP2 !== null && m.tbP2 !== '') ? `<span class="block text-[11px] font-semibold text-slate-400">(${m.tbP1}-${m.tbP2})</span>` : '' }</div>`
                     : `<span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">VS</span>`;
 
                 let card = document.createElement('div');
@@ -764,12 +779,14 @@
                 let p1 = state.players.find(pl => pl.id === m.p1Id) || { name: "Unknown" };
                 let p2 = state.players.find(pl => pl.id === m.p2Id) || { name: "Unknown" };
 
+                let tbDisplay = (m.tbP1 !== null && m.tbP1 !== '' && m.tbP2 !== null && m.tbP2 !== '') ? `<span class="text-[11px] font-semibold text-slate-400 ml-1">(${m.tbP1}-${m.tbP2})</span>` : '';
+
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-900/65 transition border-b border-slate-800/40";
                 tr.innerHTML = `
                     <td class="py-4 px-6 font-bold text-tennis-400">Round ${m.round}</td>
                     <td class="py-4 px-6 text-right font-bold text-white">${p1.name}</td>
-                    <td class="py-4 px-4 text-center font-black text-white bg-slate-900/50">${m.scoreP1} - ${m.scoreP2}</td>
+                    <td class="py-4 px-4 text-center font-black text-white bg-slate-900/50">${m.scoreP1} - ${m.scoreP2} ${tbDisplay}</td>
                     <td class="py-4 px-6 font-bold text-white">${p2.name}</td>
                     <td class="py-4 px-6 text-center"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">Final</span></td>
                     <td class="py-4 px-6 text-center">
@@ -806,6 +823,8 @@
 
             document.getElementById('set-p1').value = m.scoreP1 !== null ? m.scoreP1 : '';
             document.getElementById('set-p2').value = m.scoreP2 !== null ? m.scoreP2 : '';
+            document.getElementById('tb-p1').value = m.tbP1 !== null ? m.tbP1 : '';
+            document.getElementById('tb-p2').value = m.tbP2 !== null ? m.tbP2 : '';
 
             document.getElementById('score-modal').classList.remove('hidden');
         };
@@ -821,6 +840,8 @@
 
             let rawP1 = document.getElementById('set-p1').value.trim();
             let rawP2 = document.getElementById('set-p2').value.trim();
+            let rawTbP1 = document.getElementById('tb-p1').value.trim();
+            let rawTbP2 = document.getElementById('tb-p2').value.trim();
 
             if (rawP1 === '' || rawP2 === '' || isNaN(Number(rawP1)) || isNaN(Number(rawP2))) {
                 showToast("Please enter valid game scores for both players.", "error");
@@ -837,6 +858,8 @@
 
             m.scoreP1 = scoreP1;
             m.scoreP2 = scoreP2;
+            m.tbP1 = rawTbP1 !== '' ? Number(rawTbP1) : null;
+            m.tbP2 = rawTbP2 !== '' ? Number(rawTbP2) : null;
             m.completed = true;
 
             persistState();
@@ -903,8 +926,17 @@
             }
 
             const possibleScores = [
-                {w: 6, l: 0}, {w: 6, l: 1}, {w: 6, l: 2}, {w: 6, l: 3}, {w: 6, l: 4}, {w: 7, l: 5}, {w: 7, l: 6},
-                {w: 8, l: 6}, {w: 9, l: 7}, {w: 8, l: 5}, {w: 9, l: 8}
+                {w: 6, l: 0, tb1: null, tb2: null}, 
+                {w: 6, l: 1, tb1: null, tb2: null}, 
+                {w: 6, l: 2, tb1: null, tb2: null}, 
+                {w: 6, l: 3, tb1: null, tb2: null}, 
+                {w: 6, l: 4, tb1: null, tb2: null}, 
+                {w: 7, l: 5, tb1: null, tb2: null}, 
+                {w: 7, l: 6, tb1: 7, tb2: 5},
+                {w: 8, l: 6, tb1: null, tb2: null}, 
+                {w: 9, l: 7, tb1: null, tb2: null}, 
+                {w: 8, l: 5, tb1: null, tb2: null}, 
+                {w: 9, l: 8, tb1: 10, tb2: 8}
             ];
 
             state.matches.forEach(m => {
@@ -915,6 +947,13 @@
                     m.scoreP2 = p1Wins ? scoreObj.l : scoreObj.w;
                     if (m.scoreP1 === m.scoreP2) {
                         m.scoreP1 += 1;
+                    }
+                    if (scoreObj.tb1 !== null) {
+                        m.tbP1 = p1Wins ? scoreObj.tb1 : scoreObj.tb2;
+                        m.tbP2 = p1Wins ? scoreObj.tb2 : scoreObj.tb1;
+                    } else {
+                        m.tbP1 = null;
+                        m.tbP2 = null;
                     }
                     m.completed = true;
                 }
