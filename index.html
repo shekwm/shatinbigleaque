@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shatin Big League V010</title>
+    <title>Shatin Big League V011</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -34,7 +34,7 @@
                     <i class="fa-solid fa-table-tennis-paddle-ball"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white tracking-wide">Shatin Big League <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-tennis-500/20 text-tennis-400 border border-tennis-500/30">V010</span></h1>
+                    <h1 class="text-xl font-bold text-white tracking-wide">Shatin Big League <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-tennis-500/20 text-tennis-400 border border-tennis-500/30">V011</span></h1>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span id="sync-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
                             <i class="fa-solid fa-hard-drive"></i> Local Storage Only
@@ -44,30 +44,28 @@
                 </div>
             </div>
 
-            <!-- Desktop Navigation -->
+            <!-- Desktop Navigation (Sync Tab Removed) -->
             <nav class="hidden md:flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
                 <button id="nav-standings" onclick="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2"><i class="fa-solid fa-trophy"></i> Standings</button>
                 <button id="nav-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> Fixtures</button>
                 <button id="nav-results" onclick="switchTab('results')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-square-poll-vertical"></i> Results</button>
                 <button id="nav-players" onclick="switchTab('players')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-users"></i> Players</button>
-                <button id="nav-sync" onclick="switchTab('sync')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-indigo-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up"></i> Sync</button>
             </nav>
         </div>
 
-        <!-- Mobile Navigation -->
+        <!-- Mobile Navigation (Sync Tab Removed) -->
         <div class="md:hidden flex overflow-x-auto px-4 pb-3 gap-2 no-scrollbar border-t border-slate-800/60 pt-2">
             <button id="mob-nav-standings" onclick="switchTab('standings')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white">Standings</button>
             <button id="mob-nav-fixtures" onclick="switchTab('fixtures')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Fixtures</button>
             <button id="mob-nav-results" onclick="switchTab('results')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Results</button>
             <button id="mob-nav-players" onclick="switchTab('players')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Players</button>
-            <button id="mob-nav-sync" onclick="switchTab('sync')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-indigo-400 bg-indigo-500/10 border border-indigo-500/30">Sync</button>
         </div>
     </header>
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 mt-6">
 
-        <!-- Quick Stats Banner -->
+        <!-- Quick Stats Banner (Sync button added here) -->
         <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 flex items-center justify-between">
                 <div>
@@ -86,8 +84,9 @@
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 flex items-center justify-between">
                 <div>
                     <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Quick Actions</div>
-                    <div class="flex items-center gap-2 mt-1">
+                    <div class="flex items-center gap-2 mt-1 flex-wrap">
                         <button onclick="simulateRemainingMatches()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">Simulate</button>
+                        <button onclick="openSyncModal()" class="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-semibold text-indigo-300 rounded-lg border border-indigo-500/30 transition flex items-center gap-1"><i class="fa-solid fa-cloud-arrow-up"></i> Sync</button>
                         <button onclick="confirmResetData()" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-400 rounded-lg border border-rose-500/30 transition">Reset</button>
                     </div>
                 </div>
@@ -125,12 +124,13 @@
 
         <!-- Fixtures View -->
         <section id="view-fixtures" class="hidden space-y-4">
-            <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-xl flex items-center justify-between">
-                <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-calendar-days text-tennis-400"></i> Match Fixtures</h2>
-                <div class="flex items-center gap-3">
-                    <label for="round-select" class="text-xs font-bold text-slate-400 uppercase">Select Round:</label>
-                    <select id="round-select" onchange="changeActiveRound(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2 text-sm font-semibold focus:outline-none focus:border-tennis-500"></select>
+            <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-xl">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                    <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-calendar-days text-tennis-400"></i> Match Fixtures</h2>
+                    <div class="text-xs text-slate-400 font-semibold">Select a player to view and enter scores for their matches</div>
                 </div>
+                <!-- Player Selector Bar -->
+                <div id="player-selector-bar" class="flex flex-wrap gap-2 pt-2 border-t border-slate-800"></div>
             </div>
             <div id="fixtures-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </section>
@@ -170,50 +170,52 @@
             <div id="players-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"></div>
         </section>
 
-        <!-- Sync View -->
-        <section id="view-sync" class="hidden space-y-4">
-            <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-6 max-w-2xl mx-auto shadow-xl">
-                <h2 class="font-bold text-lg text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i> Firebase Config Settings</h2>
-                <p class="text-xs text-slate-400 mb-6">Enter your custom Firebase project credentials below to enable live sync across multiple devices.</p>
-                <div class="space-y-4">
+    </main>
+
+    <!-- Sync Configuration Modal (Password Protected) -->
+    <div id="sync-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-base flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i> Firebase Sync Settings</h3>
+                <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-400">Enter your Firebase project credentials below to enable live sync across multiple devices.</p>
+            <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">API Key</label>
+                    <input id="fb-apikey" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">API Key</label>
-                        <input id="fb-apikey" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Auth Domain</label>
-                            <input id="fb-authdomain" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Project ID</label>
-                            <input id="fb-projectid" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Storage Bucket</label>
-                            <input id="fb-storagebucket" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Messaging Sender ID</label>
-                            <input id="fb-senderid" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                        </div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Auth Domain</label>
+                        <input id="fb-authdomain" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">App ID</label>
-                        <input id="fb-appid" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div class="pt-4">
-                        <button onclick="saveFirebaseConfig()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> Save & Reconnect
-                        </button>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Project ID</label>
+                        <input id="fb-projectid" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
                     </div>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Storage Bucket</label>
+                        <input id="fb-storagebucket" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Messaging Sender ID</label>
+                        <input id="fb-senderid" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">App ID</label>
+                    <input id="fb-appid" type="text" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
             </div>
-        </section>
-
-    </main>
+            <div class="flex items-center gap-3 pt-3 border-t border-slate-800">
+                <button onclick="closeSyncModal()" class="w-1/2 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">Cancel</button>
+                <button onclick="saveFirebaseConfig()" class="w-1/2 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition shadow-lg">Save & Reconnect</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Score Edit Modal -->
     <div id="score-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -275,7 +277,7 @@
         </div>
     </div>
 
-    <!-- Firebase Compatibility (UMD) SDKs - Compatible with file:// protocol -->
+    <!-- Firebase Compatibility (UMD) SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -305,7 +307,7 @@
         let state = {
             players: JSON.parse(JSON.stringify(defaultPlayers)),
             matches: [],
-            activeRound: 1
+            activePlayerId: 1
         };
 
         let db = null;
@@ -402,6 +404,9 @@
             if (saved) {
                 try {
                     state = JSON.parse(saved);
+                    if (state.activeRound !== undefined && state.activePlayerId === undefined) {
+                        state.activePlayerId = 1;
+                    }
                 } catch (e) {
                     loadDefaults();
                 }
@@ -413,7 +418,7 @@
         function loadDefaults() {
             state.players = JSON.parse(JSON.stringify(defaultPlayers));
             state.matches = generateRoundRobinSchedule(state.players);
-            state.activeRound = 1;
+            state.activePlayerId = 1;
             persistState();
         }
 
@@ -469,6 +474,9 @@
                             if (m.tbP2 === undefined) m.tbP2 = null;
                         });
                     }
+                    if (state.activePlayerId === undefined) {
+                        state.activePlayerId = 1;
+                    }
                     renderAll();
                 } else {
                     loadDefaults();
@@ -491,6 +499,17 @@
                 localStorage.setItem('shatin_big_league_local_v1', JSON.stringify(state));
             }
             renderAll();
+        };
+
+        window.openSyncModal = function() {
+            if (!requireQuickActionPassword('open Sync settings')) {
+                return;
+            }
+            document.getElementById('sync-modal').classList.remove('hidden');
+        };
+
+        window.closeSyncModal = function() {
+            document.getElementById('sync-modal').classList.add('hidden');
         };
 
         window.saveFirebaseConfig = function() {
@@ -516,19 +535,19 @@
         };
 
         window.switchTab = function(tabName) {
-            const tabs = ['standings', 'fixtures', 'players', 'results', 'sync'];
+            const tabs = ['standings', 'fixtures', 'players', 'results'];
             tabs.forEach(t => {
                 const viewEl = document.getElementById(`view-${t}`);
                 if (viewEl) viewEl.classList.add('hidden');
 
                 const navBtn = document.getElementById(`nav-${t}`);
                 if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2 " + (t === 'sync' ? 'text-indigo-400 hover:text-white hover:bg-slate-800' : '');
+                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2";
                 }
 
                 const mobBtn = document.getElementById(`mob-nav-${t}`);
                 if (mobBtn) {
-                    mobBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900 " + (t === 'sync' ? 'text-indigo-400 bg-indigo-500/10 border border-indigo-500/30' : '');
+                    mobBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900";
                 }
             });
 
@@ -537,20 +556,12 @@
 
             const activeNav = document.getElementById(`nav-${tabName}`);
             if (activeNav) {
-                if (tabName === 'sync') {
-                    activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-500/20 text-indigo-300 shadow-sm flex items-center gap-2 border border-indigo-500/30";
-                } else {
-                    activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2";
-                }
+                activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2";
             }
 
             const activeMob = document.getElementById(`mob-nav-${tabName}`);
             if (activeMob) {
-                if (tabName === 'sync') {
-                    activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
-                } else {
-                    activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white";
-                }
+                activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white";
             }
         };
 
@@ -675,24 +686,31 @@
         }
 
         function renderFixturesControls() {
-            const select = document.getElementById('round-select');
-            if (!select) return;
-            select.innerHTML = '';
+            const bar = document.getElementById('player-selector-bar');
+            if (!bar) return;
+            bar.innerHTML = '';
 
-            const totalRounds = state.players.length % 2 === 0 ? state.players.length - 1 : state.players.length;
-
-            for (let r = 1; r <= totalRounds; r++) {
-                let opt = document.createElement('option');
-                opt.value = r;
-                opt.textContent = `Round ${r}`;
-                if (r === state.activeRound) opt.selected = true;
-                select.appendChild(opt);
+            if (!state.activePlayerId && state.players.length > 0) {
+                state.activePlayerId = state.players[0].id;
             }
+
+            state.players.forEach(pl => {
+                let isActive = pl.id === state.activePlayerId;
+                let btn = document.createElement('button');
+                btn.type = "button";
+                btn.onclick = () => changeActivePlayer(pl.id);
+                btn.className = isActive 
+                    ? "px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-tennis-600 text-white shadow-md border border-tennis-500"
+                    : "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80";
+                btn.textContent = pl.name;
+                bar.appendChild(btn);
+            });
         }
 
-        window.changeActiveRound = function(val) {
-            state.activeRound = parseInt(val);
+        window.changeActivePlayer = function(playerId) {
+            state.activePlayerId = playerId;
             renderFixtures();
+            renderFixturesControls();
         };
 
         function renderFixtures() {
@@ -700,15 +718,22 @@
             if (!container) return;
             container.innerHTML = '';
 
-            let roundMatches = state.matches.filter(m => m.round === state.activeRound);
+            let playerMatches = state.matches.filter(m => m.p1Id === state.activePlayerId || m.p2Id === state.activePlayerId);
+            let activePlayerObj = state.players.find(pl => pl.id === state.activePlayerId);
+            let activePlayerName = activePlayerObj ? activePlayerObj.name : "Player";
 
-            roundMatches.forEach((m, idx) => {
+            if (playerMatches.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-slate-950/80 rounded-2xl border border-slate-800 p-8 text-center text-slate-500 italic">No fixtures found for ${activePlayerName}.</div>`;
+                return;
+            }
+
+            playerMatches.forEach((m, idx) => {
                 let p1 = state.players.find(pl => pl.id === m.p1Id) || { name: "Unknown" };
                 let p2 = state.players.find(pl => pl.id === m.p2Id) || { name: "Unknown" };
 
                 let statusBadge = m.completed 
                     ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Complete</span>`
-                    : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming</span>`;
+                    : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming (Round ${m.round})</span>`;
 
                 let scoreDisplay = m.completed
                     ? `<div class="font-black text-tennis-400 text-base">${m.scoreP1} - ${m.scoreP2}${ (m.tbP1 !== null && m.tbP1 !== '' && m.tbP2 !== null && m.tbP2 !== '') ? `<span class="block text-[11px] font-semibold text-slate-400">(${m.tbP1}-${m.tbP2})</span>` : '' }</div>`
@@ -718,13 +743,13 @@
                 card.className = "bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-lg flex flex-col justify-between hover:border-slate-700 transition";
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Match #${idx + 1} (Single Set)</span>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Match #${idx + 1} &bull; Round ${m.round}</span>
                         ${statusBadge}
                     </div>
                     <div class="flex items-center justify-between my-2">
-                        <div class="w-5/12 text-right font-bold text-white text-base truncate" title="${p1.name}">${p1.name}</div>
+                        <div class="w-5/12 text-right font-bold text-white text-base truncate ${m.p1Id === state.activePlayerId ? 'text-tennis-400 underline decoration-tennis-500/40' : ''}" title="${p1.name}">${p1.name}</div>
                         <div class="w-2/12 text-center">${scoreDisplay}</div>
-                        <div class="w-5/12 text-left font-bold text-white text-base truncate" title="${p2.name}">${p2.name}</div>
+                        <div class="w-5/12 text-left font-bold text-white text-base truncate ${m.p2Id === state.activePlayerId ? 'text-tennis-400 underline decoration-tennis-500/40' : ''}" title="${p2.name}">${p2.name}</div>
                     </div>
                     <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-end">
                         <button onclick="openScoreModal('${m.id}')" class="px-4 py-2 bg-slate-900 hover:bg-tennis-600 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition border border-slate-700">
