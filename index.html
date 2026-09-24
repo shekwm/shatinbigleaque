@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shatin Big League V011</title>
+    <title>ST Ranking V012</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -34,7 +34,7 @@
                     <i class="fa-solid fa-table-tennis-paddle-ball"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white tracking-wide">Shatin Big League <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-tennis-500/20 text-tennis-400 border border-tennis-500/30">V011</span></h1>
+                    <h1 class="text-xl font-bold text-white tracking-wide">ST Ranking <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-tennis-500/20 text-tennis-400 border border-tennis-500/30">V012</span></h1>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span id="sync-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
                             <i class="fa-solid fa-hard-drive"></i> Local Storage Only
@@ -44,7 +44,7 @@
                 </div>
             </div>
 
-            <!-- Desktop Navigation (Sync Tab Removed) -->
+            <!-- Desktop Navigation -->
             <nav class="hidden md:flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
                 <button id="nav-standings" onclick="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2"><i class="fa-solid fa-trophy"></i> Standings</button>
                 <button id="nav-fixtures" onclick="switchTab('fixtures')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2"><i class="fa-solid fa-calendar-days"></i> Fixtures</button>
@@ -53,7 +53,7 @@
             </nav>
         </div>
 
-        <!-- Mobile Navigation (Sync Tab Removed) -->
+        <!-- Mobile Navigation -->
         <div class="md:hidden flex overflow-x-auto px-4 pb-3 gap-2 no-scrollbar border-t border-slate-800/60 pt-2">
             <button id="mob-nav-standings" onclick="switchTab('standings')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white">Standings</button>
             <button id="mob-nav-fixtures" onclick="switchTab('fixtures')" class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900">Fixtures</button>
@@ -65,19 +65,19 @@
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 mt-6">
 
-        <!-- Quick Stats Banner (Sync button added here) -->
+        <!-- Quick Stats Banner -->
         <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 flex items-center justify-between">
                 <div>
                     <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Completed Matches</div>
-                    <div id="stat-total-matches" class="text-2xl font-black text-white mt-1">0 / 120</div>
+                    <div id="stat-total-matches" class="text-2xl font-black text-white mt-1">0 / 0</div>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-slate-900 text-tennis-400 flex items-center justify-center border border-slate-800"><i class="fa-solid fa-circle-check"></i></div>
             </div>
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 flex items-center justify-between">
                 <div>
                     <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Scoring System</div>
-                    <div class="text-sm font-bold text-slate-200 mt-1">Games Won + 3 Pts + (6-0 Bonus)</div>
+                    <div class="text-sm font-bold text-slate-200 mt-1">Games Won + 2 Pts + Lower Ranker Bonus + (6-0 Bonus)</div>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-slate-900 text-tennis-400 flex items-center justify-center border border-slate-800"><i class="fa-solid fa-calculator"></i></div>
             </div>
@@ -87,6 +87,9 @@
                     <div class="flex items-center gap-2 mt-1 flex-wrap">
                         <button onclick="simulateRemainingMatches()" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 rounded-lg border border-slate-700 transition">Simulate</button>
                         <button onclick="openSyncModal()" class="px-2.5 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-xs font-semibold text-indigo-300 rounded-lg border border-indigo-500/30 transition flex items-center gap-1"><i class="fa-solid fa-cloud-arrow-up"></i> Sync</button>
+                        <button onclick="exportData()" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-semibold text-emerald-300 rounded-lg border border-emerald-500/30 transition flex items-center gap-1"><i class="fa-solid fa-file-arrow-down"></i> Export</button>
+                        <button onclick="triggerImport()" class="px-2.5 py-1 bg-sky-500/10 hover:bg-sky-500/20 text-xs font-semibold text-sky-300 rounded-lg border border-sky-500/30 transition flex items-center gap-1"><i class="fa-solid fa-file-arrow-up"></i> Import</button>
+                        <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importData(event)">
                         <button onclick="confirmResetData()" class="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-xs font-semibold text-rose-400 rounded-lg border border-rose-500/30 transition">Reset</button>
                     </div>
                 </div>
@@ -122,17 +125,26 @@
             </div>
         </section>
 
-        <!-- Fixtures View -->
+        <!-- Fixtures View (Two-Player Selection) -->
         <section id="view-fixtures" class="hidden space-y-4">
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-xl">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                     <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-calendar-days text-tennis-400"></i> Match Fixtures</h2>
-                    <div class="text-xs text-slate-400 font-semibold">Select a player to view and enter scores for their matches</div>
+                    <div class="text-xs text-slate-400 font-semibold">Select two players to find and input match results</div>
                 </div>
-                <!-- Player Selector Bar -->
-                <div id="player-selector-bar" class="flex flex-wrap gap-2 pt-2 border-t border-slate-800"></div>
+                <!-- Dual Player Selectors Bar -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Player 1</label>
+                        <select id="fixture-player-1" onchange="onFixturePlayerChange()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-tennis-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Player 2</label>
+                        <select id="fixture-player-2" onchange="onFixturePlayerChange()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-semibold text-white focus:outline-none focus:border-tennis-500"></select>
+                    </div>
+                </div>
             </div>
-            <div id="fixtures-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="fixtures-container" class="grid grid-cols-1 gap-4"></div>
         </section>
 
         <!-- Results View -->
@@ -162,7 +174,7 @@
         <!-- Players View -->
         <section id="view-players" class="hidden space-y-4">
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-xl flex items-center justify-between">
-                <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-users text-sky-400"></i> League Roster</h2>
+                <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-users text-sky-400"></i> League Roster (64 Players)</h2>
                 <button onclick="randomizePlayerNames()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center gap-2">
                     <i class="fa-solid fa-shuffle"></i> Randomize Names
                 </button>
@@ -172,7 +184,7 @@
 
     </main>
 
-    <!-- Sync Configuration Modal (Password Protected) -->
+    <!-- Sync Configuration Modal -->
     <div id="sync-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -277,49 +289,37 @@
         </div>
     </div>
 
-    <!-- Firebase Compatibility (UMD) SDKs -->
+    <!-- Firebase Compatibility SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <script>
-        const defaultPlayers = [
-            { id: 1, name: "Jason" },
-            { id: 2, name: "Kiff" },
-            { id: 3, name: "Sammi" },
-            { id: 4, name: "Jeremy" },
-            { id: 5, name: "Player 5" },
-            { id: 6, name: "Player 6" },
-            { id: 7, name: "Player 7" },
-            { id: 8, name: "Player 8" },
-            { id: 9, name: "Player 9" },
-            { id: 10, name: "Player 10" },
-            { id: 11, name: "Player 11" },
-            { id: 12, name: "Player 12" },
-            { id: 13, name: "Player 13" },
-            { id: 14, name: "Player 14" },
-            { id: 15, name: "Player 15" },
-            { id: 16, name: "Player 16" }
-        ];
+        // Generate 64 default players programmatically
+        const defaultPlayers = Array.from({ length: 64 }, (_, i) => ({
+            id: i + 1,
+            name: `Player ${i + 1}`
+        }));
 
         const QUICK_ACTION_PASSWORD = 'Sammi';
 
         let state = {
             players: JSON.parse(JSON.stringify(defaultPlayers)),
             matches: [],
-            activePlayerId: 1
+            fixturePlayer1Id: 1,
+            fixturePlayer2Id: 2
         };
 
         let db = null;
         let auth = null;
         let isCloudSynced = false;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'shatin-big-league-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'st-ranking-v12';
 
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyCuRWD8bjCTEGz8nhItHETL2Y66nbfFm4Y",
-            authDomain: "shatinbigleaque.firebaseapp.com",
-            projectId: "shatinbigleaque",
-            storageBucket: "shatinbigleaque.firebasestorage.app",
+            authDomain: "st-ranking.firebaseapp.com",
+            projectId: "st-ranking",
+            storageBucket: "st-ranking.firebasestorage.app",
             messagingSenderId: "460883073764",
             appId: "1:460883073764:web:81b774a1f1a769b8f56af1",
             measurementId: "G-NTLY03L3WY"
@@ -330,28 +330,16 @@
             if (entered === null) {
                 return false;
             }
-
             if (entered !== QUICK_ACTION_PASSWORD) {
                 showToast(`Incorrect password. ${actionLabel} cancelled.`, 'error');
                 return false;
             }
-
             return true;
         }
 
         window.initApp = async function() {
-            let savedConfig = localStorage.getItem('shatin_fb_config');
-            let configToUse = null;
-
-            if (savedConfig) {
-                try {
-                    configToUse = JSON.parse(savedConfig);
-                } catch (e) {
-                    configToUse = defaultFirebaseConfig;
-                }
-            } else {
-                configToUse = defaultFirebaseConfig;
-            }
+            let savedConfig = localStorage.getItem('st_ranking_fb_config');
+            let configToUse = savedConfig ? JSON.parse(savedConfig) : defaultFirebaseConfig;
 
             if (configToUse && configToUse.apiKey && typeof firebase !== 'undefined') {
                 try {
@@ -368,25 +356,10 @@
                     }
 
                     isCloudSynced = true;
-
-                    const syncPill = document.getElementById('sync-status-pill');
-                    if (syncPill) {
-                        syncPill.innerHTML = `<i class="fa-solid fa-cloud text-emerald-400"></i> Live Cloud Sync`;
-                        syncPill.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
-                    }
-
-                    const connBadge = document.getElementById('connection-status-badge');
-                    if (connBadge) {
-                        connBadge.textContent = "Connected & Syncing";
-                        connBadge.className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
-                    }
-
-                    if (document.getElementById('fb-apikey')) document.getElementById('fb-apikey').value = configToUse.apiKey || '';
-                    if (document.getElementById('fb-authdomain')) document.getElementById('fb-authdomain').value = configToUse.authDomain || '';
-                    if (document.getElementById('fb-projectid')) document.getElementById('fb-projectid').value = configToUse.projectId || '';
-                    if (document.getElementById('fb-storagebucket')) document.getElementById('fb-storagebucket').value = configToUse.storageBucket || '';
-                    if (document.getElementById('fb-senderid')) document.getElementById('fb-senderid').value = configToUse.messagingSenderId || '';
-                    if (document.getElementById('fb-appid')) document.getElementById('fb-appid').value = configToUse.appId || '';
+                    document.getElementById('sync-status-pill').innerHTML = `<i class="fa-solid fa-cloud text-emerald-400"></i> Live Cloud Sync`;
+                    document.getElementById('sync-status-pill').className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+                    document.getElementById('connection-status-badge').textContent = "Connected & Syncing";
+                    document.getElementById('connection-status-badge').className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
 
                     setupFirestoreListener();
                     return;
@@ -400,13 +373,17 @@
         };
 
         function loadLocalState() {
-            const saved = localStorage.getItem('shatin_big_league_local_v1');
+            const saved = localStorage.getItem('st_ranking_local_v12');
             if (saved) {
                 try {
                     state = JSON.parse(saved);
-                    if (state.activeRound !== undefined && state.activePlayerId === undefined) {
-                        state.activePlayerId = 1;
+                    // Ensure 64 players if loaded from an older cache state
+                    if (!state.players || state.players.length !== 64) {
+                        loadDefaults();
+                        return;
                     }
+                    if (state.fixturePlayer1Id === undefined) state.fixturePlayer1Id = 1;
+                    if (state.fixturePlayer2Id === undefined) state.fixturePlayer2Id = 2;
                 } catch (e) {
                     loadDefaults();
                 }
@@ -418,7 +395,8 @@
         function loadDefaults() {
             state.players = JSON.parse(JSON.stringify(defaultPlayers));
             state.matches = generateRoundRobinSchedule(state.players);
-            state.activePlayerId = 1;
+            state.fixturePlayer1Id = 1;
+            state.fixturePlayer2Id = 2;
             persistState();
         }
 
@@ -466,17 +444,15 @@
             docRef.onSnapshot((docSnap) => {
                 if (docSnap.exists) {
                     state = docSnap.data();
+                    if (!state.players || state.players.length !== 64) {
+                        loadDefaults();
+                        return;
+                    }
                     if (!state.matches || state.matches.length === 0) {
                         state.matches = generateRoundRobinSchedule(state.players);
-                    } else {
-                        state.matches.forEach(m => {
-                            if (m.tbP1 === undefined) m.tbP1 = null;
-                            if (m.tbP2 === undefined) m.tbP2 = null;
-                        });
                     }
-                    if (state.activePlayerId === undefined) {
-                        state.activePlayerId = 1;
-                    }
+                    if (state.fixturePlayer1Id === undefined) state.fixturePlayer1Id = 1;
+                    if (state.fixturePlayer2Id === undefined) state.fixturePlayer2Id = 2;
                     renderAll();
                 } else {
                     loadDefaults();
@@ -496,15 +472,13 @@
                     console.error("Error writing to cloud:", e);
                 }
             } else {
-                localStorage.setItem('shatin_big_league_local_v1', JSON.stringify(state));
+                localStorage.setItem('st_ranking_local_v12', JSON.stringify(state));
             }
             renderAll();
         };
 
         window.openSyncModal = function() {
-            if (!requireQuickActionPassword('open Sync settings')) {
-                return;
-            }
+            if (!requireQuickActionPassword('open Sync settings')) return;
             document.getElementById('sync-modal').classList.remove('hidden');
         };
 
@@ -527,42 +501,61 @@
                 return;
             }
 
-            localStorage.setItem('shatin_fb_config', JSON.stringify(cfg));
+            localStorage.setItem('st_ranking_fb_config', JSON.stringify(cfg));
             showToast("Firebase config saved! Reloading...", "success");
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            setTimeout(() => window.location.reload(), 1000);
+        };
+
+        window.exportData = function() {
+            if (!requireQuickActionPassword('export league data')) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `st_ranking_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Ranking data exported successfully!", "success");
+        };
+
+        window.triggerImport = function() {
+            if (!requireQuickActionPassword('import league data')) return;
+            document.getElementById('import-file-input').click();
+        };
+
+        window.importData = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (!importedState.players || !importedState.matches) throw new Error("Invalid format");
+                    state = importedState;
+                    if (state.fixturePlayer1Id === undefined) state.fixturePlayer1Id = 1;
+                    if (state.fixturePlayer2Id === undefined) state.fixturePlayer2Id = 2;
+                    persistState();
+                    showToast("Ranking data imported successfully!", "success");
+                } catch (err) {
+                    showToast("Failed to import: Invalid JSON file format.", "error");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         };
 
         window.switchTab = function(tabName) {
             const tabs = ['standings', 'fixtures', 'players', 'results'];
             tabs.forEach(t => {
-                const viewEl = document.getElementById(`view-${t}`);
-                if (viewEl) viewEl.classList.add('hidden');
-
-                const navBtn = document.getElementById(`nav-${t}`);
-                if (navBtn) {
-                    navBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2";
-                }
-
-                const mobBtn = document.getElementById(`mob-nav-${t}`);
-                if (mobBtn) {
-                    mobBtn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900";
-                }
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-2";
+                document.getElementById(`mob-nav-${t}`).className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 bg-slate-900";
             });
 
-            const targetView = document.getElementById(`view-${tabName}`);
-            if (targetView) targetView.classList.remove('hidden');
-
-            const activeNav = document.getElementById(`nav-${tabName}`);
-            if (activeNav) {
-                activeNav.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2";
-            }
-
-            const activeMob = document.getElementById(`mob-nav-${tabName}`);
-            if (activeMob) {
-                activeMob.className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white";
-            }
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabName}`).className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-tennis-600 text-white shadow-sm flex items-center gap-2";
+            document.getElementById(`mob-nav-${tabName}`).className = "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-tennis-600 text-white";
         };
 
         function renderAll() {
@@ -577,21 +570,10 @@
         function calculateStandings() {
             let stats = {};
             state.players.forEach(pl => {
-                stats[pl.id] = {
-                    id: pl.id,
-                    name: pl.name,
-                    played: 0,
-                    won: 0,
-                    lost: 0,
-                    gamesWon: 0,
-                    gamesLost: 0,
-                    points: 0,
-                    form: []
-                };
+                stats[pl.id] = { id: pl.id, name: pl.name, played: 0, won: 0, lost: 0, gamesWon: 0, gamesLost: 0, points: 0, form: [] };
             });
 
             let sortedMatches = [...state.matches].sort((a, b) => a.round - b.round);
-
             sortedMatches.forEach(m => {
                 if (!m.completed) return;
                 let p1 = stats[m.p1Id];
@@ -601,30 +583,33 @@
                 let scoreP1 = Number(m.scoreP1);
                 let scoreP2 = Number(m.scoreP2);
 
-                p1.played++;
-                p2.played++;
+                // Lower ranker assessment based on accumulated points prior to match
+                let p1IsLowerRanker = p1.points < p2.points;
+                let p2IsLowerRanker = p2.points < p1.points;
 
-                p1.gamesWon += scoreP1;
-                p1.gamesLost += scoreP2;
-                p2.gamesWon += scoreP2;
-                p2.gamesLost += scoreP1;
+                if (p1.points === p2.points) {
+                    if (p1.id > p2.id) p1IsLowerRanker = true;
+                    else p2IsLowerRanker = true;
+                }
+
+                let lowerRankerBonusP1 = p1IsLowerRanker ? 2 : 0;
+                let lowerRankerBonusP2 = p2IsLowerRanker ? 2 : 0;
+
+                p1.played++; p2.played++;
+                p1.gamesWon += scoreP1; p1.gamesLost += scoreP2;
+                p2.gamesWon += scoreP2; p2.gamesLost += scoreP1;
 
                 let bonusP1 = (scoreP1 === 6 && scoreP2 === 0) ? 2 : 0;
                 let bonusP2 = (scoreP2 === 6 && scoreP1 === 0) ? 2 : 0;
 
-                p1.points += (3 + scoreP1 + bonusP1);
-                p2.points += (3 + scoreP2 + bonusP2);
+                // 2 base points + games won + shutout bonus + lower ranker bonus
+                p1.points += (2 + scoreP1 + bonusP1 + lowerRankerBonusP1);
+                p2.points += (2 + scoreP2 + bonusP2 + lowerRankerBonusP2);
 
                 if (scoreP1 > scoreP2) {
-                    p1.won++;
-                    p2.lost++;
-                    p1.form.push('W');
-                    p2.form.push('L');
+                    p1.won++; p2.lost++; p1.form.push('W'); p2.form.push('L');
                 } else {
-                    p2.won++;
-                    p1.lost++;
-                    p2.form.push('W');
-                    p1.form.push('L');
+                    p2.won++; p1.lost++; p2.form.push('W'); p1.form.push('L');
                 }
             });
 
@@ -636,7 +621,6 @@
                 if (gameDiffB !== gameDiffA) return gameDiffB - gameDiffA;
                 return a.name.localeCompare(b.name);
             });
-
             return standingsArray;
         }
 
@@ -648,19 +632,15 @@
 
             standings.forEach((st, idx) => {
                 let rank = idx + 1;
-                let rankBadgeClass = "text-slate-400 font-bold";
-                if (rank === 1) rankBadgeClass = "text-amber-400 font-extrabold bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20";
-                else if (rank === 2) rankBadgeClass = "text-slate-300 font-extrabold bg-slate-300/10 px-2.5 py-1 rounded-lg border border-slate-300/20";
-                else if (rank === 3) rankBadgeClass = "text-amber-600 font-extrabold bg-amber-600/10 px-2.5 py-1 rounded-lg border border-amber-600/20";
+                let rankBadgeClass = rank === 1 ? "text-amber-400 font-extrabold bg-amber-400/10 px-2.5 py-1 rounded-lg border border-amber-400/20" :
+                                     rank === 2 ? "text-slate-300 font-extrabold bg-slate-300/10 px-2.5 py-1 rounded-lg border border-slate-300/20" :
+                                     rank === 3 ? "text-amber-600 font-extrabold bg-amber-600/10 px-2.5 py-1 rounded-lg border border-amber-600/20" : "text-slate-400 font-bold";
 
                 let gameDiff = st.gamesWon - st.gamesLost;
-                let gameDiffStr = (gameDiff > 0 ? `+${gameDiff}` : gameDiff);
-
-                let formHtml = st.form.slice(-5).map(f => {
-                    return f === 'W' 
-                        ? `<span class="w-6 h-6 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center border border-emerald-500/30">W</span>`
-                        : `<span class="w-6 h-6 rounded-md bg-rose-500/20 text-rose-400 font-bold text-xs flex items-center justify-center border border-rose-500/30">L</span>`;
-                }).join('');
+                let gameDiffStr = gameDiff > 0 ? `+${gameDiff}` : gameDiff;
+                let formHtml = st.form.slice(-5).map(f => f === 'W' ? 
+                    `<span class="w-6 h-6 rounded-md bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center border border-emerald-500/30">W</span>` :
+                    `<span class="w-6 h-6 rounded-md bg-rose-500/20 text-rose-400 font-bold text-xs flex items-center justify-center border border-rose-500/30">L</span>`).join('');
 
                 if (st.form.length === 0) formHtml = `<span class="text-xs text-slate-500 italic">No matches</span>`;
 
@@ -686,31 +666,32 @@
         }
 
         function renderFixturesControls() {
-            const bar = document.getElementById('player-selector-bar');
-            if (!bar) return;
-            bar.innerHTML = '';
+            const sel1 = document.getElementById('fixture-player-1');
+            const sel2 = document.getElementById('fixture-player-2');
+            if (!sel1 || !sel2) return;
 
-            if (!state.activePlayerId && state.players.length > 0) {
-                state.activePlayerId = state.players[0].id;
-            }
+            sel1.innerHTML = '';
+            sel2.innerHTML = '';
 
             state.players.forEach(pl => {
-                let isActive = pl.id === state.activePlayerId;
-                let btn = document.createElement('button');
-                btn.type = "button";
-                btn.onclick = () => changeActivePlayer(pl.id);
-                btn.className = isActive 
-                    ? "px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-tennis-600 text-white shadow-md border border-tennis-500"
-                    : "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80";
-                btn.textContent = pl.name;
-                bar.appendChild(btn);
+                let opt1 = document.createElement('option');
+                opt1.value = pl.id;
+                opt1.textContent = pl.name;
+                if (pl.id === state.fixturePlayer1Id) opt1.selected = true;
+                sel1.appendChild(opt1);
+
+                let opt2 = document.createElement('option');
+                opt2.value = pl.id;
+                opt2.textContent = pl.name;
+                if (pl.id === state.fixturePlayer2Id) opt2.selected = true;
+                sel2.appendChild(opt2);
             });
         }
 
-        window.changeActivePlayer = function(playerId) {
-            state.activePlayerId = playerId;
+        window.onFixturePlayerChange = function() {
+            state.fixturePlayer1Id = parseInt(document.getElementById('fixture-player-1').value);
+            state.fixturePlayer2Id = parseInt(document.getElementById('fixture-player-2').value);
             renderFixtures();
-            renderFixturesControls();
         };
 
         function renderFixtures() {
@@ -718,47 +699,53 @@
             if (!container) return;
             container.innerHTML = '';
 
-            let playerMatches = state.matches.filter(m => m.p1Id === state.activePlayerId || m.p2Id === state.activePlayerId);
-            let activePlayerObj = state.players.find(pl => pl.id === state.activePlayerId);
-            let activePlayerName = activePlayerObj ? activePlayerObj.name : "Player";
+            let p1Id = state.fixturePlayer1Id;
+            let p2Id = state.fixturePlayer2Id;
 
-            if (playerMatches.length === 0) {
-                container.innerHTML = `<div class="col-span-full bg-slate-950/80 rounded-2xl border border-slate-800 p-8 text-center text-slate-500 italic">No fixtures found for ${activePlayerName}.</div>`;
+            if (p1Id === p2Id) {
+                container.innerHTML = `<div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-8 text-center text-amber-400 font-semibold">Please select two different players to view their matchup fixture.</div>`;
                 return;
             }
 
-            playerMatches.forEach((m, idx) => {
-                let p1 = state.players.find(pl => pl.id === m.p1Id) || { name: "Unknown" };
-                let p2 = state.players.find(pl => pl.id === m.p2Id) || { name: "Unknown" };
+            let matchup = state.matches.find(m => (m.p1Id === p1Id && m.p2Id === p2Id) || (m.p1Id === p2Id && m.p2Id === p1Id));
+            let p1Obj = state.players.find(pl => pl.id === p1Id) || { name: "Player 1" };
+            let p2Obj = state.players.find(pl => pl.id === p2Id) || { name: "Player 2" };
 
-                let statusBadge = m.completed 
-                    ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Complete</span>`
-                    : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming (Round ${m.round})</span>`;
+            if (!matchup) {
+                container.innerHTML = `<div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-8 text-center text-slate-500 italic">No fixture found between ${p1Obj.name} and ${p2Obj.name}.</div>`;
+                return;
+            }
 
-                let scoreDisplay = m.completed
-                    ? `<div class="font-black text-tennis-400 text-base">${m.scoreP1} - ${m.scoreP2}${ (m.tbP1 !== null && m.tbP1 !== '' && m.tbP2 !== null && m.tbP2 !== '') ? `<span class="block text-[11px] font-semibold text-slate-400">(${m.tbP1}-${m.tbP2})</span>` : '' }</div>`
-                    : `<span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">VS</span>`;
+            let actualP1 = state.players.find(pl => pl.id === matchup.p1Id) || { name: "Unknown" };
+            let actualP2 = state.players.find(pl => pl.id === matchup.p2Id) || { name: "Unknown" };
 
-                let card = document.createElement('div');
-                card.className = "bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-lg flex flex-col justify-between hover:border-slate-700 transition";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Match #${idx + 1} &bull; Round ${m.round}</span>
-                        ${statusBadge}
-                    </div>
-                    <div class="flex items-center justify-between my-2">
-                        <div class="w-5/12 text-right font-bold text-white text-base truncate ${m.p1Id === state.activePlayerId ? 'text-tennis-400 underline decoration-tennis-500/40' : ''}" title="${p1.name}">${p1.name}</div>
-                        <div class="w-2/12 text-center">${scoreDisplay}</div>
-                        <div class="w-5/12 text-left font-bold text-white text-base truncate ${m.p2Id === state.activePlayerId ? 'text-tennis-400 underline decoration-tennis-500/40' : ''}" title="${p2.name}">${p2.name}</div>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-end">
-                        <button onclick="openScoreModal('${m.id}')" class="px-4 py-2 bg-slate-900 hover:bg-tennis-600 text-slate-300 hover:text-white text-xs font-semibold rounded-xl transition border border-slate-700">
-                            <i class="fa-solid fa-pen-to-square"></i> ${m.completed ? 'Edit Score' : 'Enter Score'}
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+            let statusBadge = matchup.completed 
+                ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20 flex items-center gap-1.5"><i class="fa-solid fa-check"></i> Complete</span>`
+                : `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/20 flex items-center gap-1.5"><i class="fa-regular fa-clock"></i> Upcoming (Round ${matchup.round})</span>`;
+
+            let scoreDisplay = matchup.completed
+                ? `<div class="font-black text-tennis-400 text-lg">${matchup.scoreP1} - ${matchup.scoreP2}${ (matchup.tbP1 !== null && matchup.tbP1 !== '' && matchup.tbP2 !== null && matchup.tbP2 !== '') ? `<span class="block text-xs font-semibold text-slate-400">(${matchup.tbP1}-${matchup.tbP2})</span>` : '' }</div>`
+                : `<span class="text-sm text-slate-500 font-semibold uppercase tracking-wider">VS</span>`;
+
+            let card = document.createElement('div');
+            card.className = "bg-slate-950/80 rounded-2xl border border-slate-800 p-6 shadow-lg flex flex-col justify-between hover:border-slate-700 transition";
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Matchup Details &bull; Round ${matchup.round}</span>
+                    ${statusBadge}
+                </div>
+                <div class="flex items-center justify-between my-4">
+                    <div class="w-5/12 text-right font-extrabold text-white text-lg truncate" title="${actualP1.name}">${actualP1.name}</div>
+                    <div class="w-2/12 text-center">${scoreDisplay}</div>
+                    <div class="w-5/12 text-left font-extrabold text-white text-lg truncate" title="${actualP2.name}">${actualP2.name}</div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-800/80 flex justify-end">
+                    <button onclick="openScoreModal('${matchup.id}')" class="px-5 py-2.5 bg-tennis-600 hover:bg-tennis-500 text-white text-xs font-bold rounded-xl transition shadow-lg flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> ${matchup.completed ? 'Edit Match Score' : 'Input Match Result'}
+                    </button>
+                </div>
+            `;
+            container.appendChild(card);
         }
 
         function renderPlayers() {
@@ -771,9 +758,7 @@
                 card.className = "bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-lg flex items-center justify-between";
                 card.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-xl bg-tennis-500/10 text-tennis-400 font-black text-sm flex items-center justify-center border border-tennis-500/20">
-                            ${pl.id}
-                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-tennis-500/10 text-tennis-400 font-black text-sm flex items-center justify-center border border-tennis-500/20">${pl.id}</div>
                         <div>
                             <div class="font-bold text-white text-base">${pl.name}</div>
                             <div class="text-xs text-slate-400">Player ID #${pl.id}</div>
@@ -793,7 +778,6 @@
             tbody.innerHTML = '';
 
             let completedMatches = state.matches.filter(m => m.completed).sort((a,b) => b.round - a.round);
-
             if (completedMatches.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 italic">No match results recorded yet. Go to Fixtures to enter scores!</td></tr>`;
                 return;
@@ -802,7 +786,6 @@
             completedMatches.forEach(m => {
                 let p1 = state.players.find(pl => pl.id === m.p1Id) || { name: "Unknown" };
                 let p2 = state.players.find(pl => pl.id === m.p2Id) || { name: "Unknown" };
-
                 let tbDisplay = (m.tbP1 !== null && m.tbP1 !== '' && m.tbP2 !== null && m.tbP2 !== '') ? `<span class="text-[11px] font-semibold text-slate-400 ml-1">(${m.tbP1}-${m.tbP2})</span>` : '';
 
                 let tr = document.createElement('tr');
@@ -814,9 +797,7 @@
                     <td class="py-4 px-6 font-bold text-white">${p2.name}</td>
                     <td class="py-4 px-6 text-center"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">Final</span></td>
                     <td class="py-4 px-6 text-center">
-                        <button onclick="openScoreModal('${m.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700">
-                            Edit
-                        </button>
+                        <button onclick="openScoreModal('${m.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700">Edit</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -841,7 +822,6 @@
             document.getElementById('modal-round-badge').textContent = `Round ${m.round}`;
             document.getElementById('modal-p1-name').textContent = p1.name;
             document.getElementById('modal-p2-name').textContent = p2.name;
-
             document.getElementById('label-set-p1').textContent = p1.name;
             document.getElementById('label-set-p2').textContent = p2.name;
 
@@ -888,13 +868,12 @@
 
             persistState();
             closeScoreModal();
-            showToast("Single-set match result saved & synced!", "success");
+            showToast("Match result saved & synced!", "success");
         };
 
         window.openPlayerModal = function(playerId) {
             let p = state.players.find(x => x.id === playerId);
             if (!p) return;
-
             document.getElementById('edit-player-id').value = p.id;
             document.getElementById('edit-player-name').value = p.name;
             document.getElementById('player-modal-title').textContent = `Edit Player #${p.id}`;
@@ -912,7 +891,6 @@
                 showToast("Player name cannot be empty.", "error");
                 return;
             }
-
             let p = state.players.find(x => x.id === id);
             if (p) {
                 p.name = newName;
@@ -931,35 +909,23 @@
                 let f = firstNames[Math.floor(Math.random() * firstNames.length)];
                 let l = lastNames[Math.floor(Math.random() * lastNames.length)];
                 let full = `${f} ${l[0]}.`;
-                if (!shuffledNames.includes(full)) {
-                    shuffledNames.push(full);
-                }
+                if (!shuffledNames.includes(full)) shuffledNames.push(full);
             }
 
-            state.players.forEach((pl, idx) => {
-                pl.name = shuffledNames[idx];
-            });
-
+            state.players.forEach((pl, idx) => { pl.name = shuffledNames[idx]; });
             persistState();
             showToast("Player names randomized!", "success");
         };
 
         window.simulateRemainingMatches = function() {
-            if (!requireQuickActionPassword('simulate remaining matches')) {
-                return;
-            }
+            if (!requireQuickActionPassword('simulate remaining matches')) return;
 
             const possibleScores = [
-                {w: 6, l: 0, tb1: null, tb2: null}, 
-                {w: 6, l: 1, tb1: null, tb2: null}, 
-                {w: 6, l: 2, tb1: null, tb2: null}, 
-                {w: 6, l: 3, tb1: null, tb2: null}, 
-                {w: 6, l: 4, tb1: null, tb2: null}, 
-                {w: 7, l: 5, tb1: null, tb2: null}, 
-                {w: 7, l: 6, tb1: 7, tb2: 5},
-                {w: 8, l: 6, tb1: null, tb2: null}, 
-                {w: 9, l: 7, tb1: null, tb2: null}, 
-                {w: 8, l: 5, tb1: null, tb2: null}, 
+                {w: 6, l: 0, tb1: null, tb2: null}, {w: 6, l: 1, tb1: null, tb2: null}, 
+                {w: 6, l: 2, tb1: null, tb2: null}, {w: 6, l: 3, tb1: null, tb2: null}, 
+                {w: 6, l: 4, tb1: null, tb2: null}, {w: 7, l: 5, tb1: null, tb2: null}, 
+                {w: 7, l: 6, tb1: 7, tb2: 5}, {w: 8, l: 6, tb1: null, tb2: null}, 
+                {w: 9, l: 7, tb1: null, tb2: null}, {w: 8, l: 5, tb1: null, tb2: null}, 
                 {w: 9, l: 8, tb1: 10, tb2: 8}
             ];
 
@@ -969,33 +935,27 @@
                     let p1Wins = Math.random() > 0.5;
                     m.scoreP1 = p1Wins ? scoreObj.w : scoreObj.l;
                     m.scoreP2 = p1Wins ? scoreObj.l : scoreObj.w;
-                    if (m.scoreP1 === m.scoreP2) {
-                        m.scoreP1 += 1;
-                    }
+                    if (m.scoreP1 === m.scoreP2) m.scoreP1 += 1;
                     if (scoreObj.tb1 !== null) {
                         m.tbP1 = p1Wins ? scoreObj.tb1 : scoreObj.tb2;
                         m.tbP2 = p1Wins ? scoreObj.tb2 : scoreObj.tb1;
                     } else {
-                        m.tbP1 = null;
-                        m.tbP2 = null;
+                        m.tbP1 = null; m.tbP2 = null;
                     }
                     m.completed = true;
                 }
             });
 
             persistState();
-            showToast("All remaining single-set matches simulated!", "success");
+            showToast("All remaining matches simulated!", "success");
         };
 
         window.confirmResetData = function() {
-            if (!requireQuickActionPassword('reset the league')) {
-                return;
-            }
-
-            if (confirm("Are you sure you want to reset the entire league? All scores and stats will be cleared.")) {
+            if (!requireQuickActionPassword('reset the league')) return;
+            if (confirm("Are you sure you want to reset the entire ranking? All scores and stats will be cleared.")) {
                 loadDefaults();
                 persistState();
-                showToast("League has been reset.", "info");
+                showToast("Ranking has been reset.", "info");
             }
         };
 
@@ -1006,21 +966,14 @@
             if (!toast || !msgEl || !iconEl) return;
 
             msgEl.textContent = message;
-            if (type === "error") {
-                iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-500"></i>';
-            } else if (type === "info") {
-                iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-sky-500"></i>';
-            } else {
-                iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-tennis-500"></i>';
-            }
+            if (type === "error") iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation text-rose-500"></i>';
+            else if (type === "info") iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-sky-500"></i>';
+            else iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-tennis-500"></i>';
 
             toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-24', 'opacity-0');
-            }, 3500);
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3500);
         }
 
-        // Initialize application when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
             window.initApp();
         });
