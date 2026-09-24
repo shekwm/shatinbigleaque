@@ -125,14 +125,13 @@
             </div>
         </section>
 
-        <!-- Fixtures View (Two-Player Selection) -->
+        <!-- Fixtures View -->
         <section id="view-fixtures" class="hidden space-y-4">
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-5 shadow-xl">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                     <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-calendar-days text-tennis-400"></i> Match Fixtures</h2>
                     <div class="text-xs text-slate-400 font-semibold">Select two players to find and input match results</div>
                 </div>
-                <!-- Dual Player Selectors Bar -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-800">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Select Player 1</label>
@@ -191,7 +190,7 @@
                 <h3 class="font-bold text-white text-base flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i> Firebase Sync Settings</h3>
                 <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <p class="text-xs text-slate-400">Enter your Firebase project credentials below to enable live sync across multiple devices.</p>
+            <p class="text-xs text-slate-400">Your preloaded Firebase credentials are active below. You can update them if needed.</p>
             <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1">API Key</label>
@@ -315,14 +314,15 @@
         let isCloudSynced = false;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'st-ranking-v12';
 
+        // Preloaded Firebase Configuration explicitly mapped with updated project id
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyCuRWD8bjCTEGz8nhItHETL2Y66nbfFm4Y",
-            authDomain: "st-ranking.firebaseapp.com",
-            projectId: "st-ranking",
-            storageBucket: "st-ranking.firebasestorage.app",
+            authDomain: "shatinbigleaque.firebaseapp.com",
+            databaseURL: "https://shatinbigleaque-default-rtdb.firebaseio.com",
+            projectId: "shatinbigleaque",
+            storageBucket: "shatinbigleaque.firebasestorage.app",
             messagingSenderId: "460883073764",
-            appId: "1:460883073764:web:81b774a1f1a769b8f56af1",
-            measurementId: "G-NTLY03L3WY"
+            appId: "1:460883073764:web:b8c248fbd2cc71eef56af1"
         };
 
         function requireQuickActionPassword(actionLabel) {
@@ -338,8 +338,17 @@
         }
 
         window.initApp = async function() {
+            // Check local storage for configuration override, otherwise use the preloaded default config
             let savedConfig = localStorage.getItem('st_ranking_fb_config');
             let configToUse = savedConfig ? JSON.parse(savedConfig) : defaultFirebaseConfig;
+
+            // Populate settings modal inputs with active config fields
+            document.getElementById('fb-apikey').value = configToUse.apiKey || '';
+            document.getElementById('fb-authdomain').value = configToUse.authDomain || '';
+            document.getElementById('fb-projectid').value = configToUse.projectId || '';
+            document.getElementById('fb-storagebucket').value = configToUse.storageBucket || '';
+            document.getElementById('fb-senderid').value = configToUse.messagingSenderId || '';
+            document.getElementById('fb-appid').value = configToUse.appId || '';
 
             if (configToUse && configToUse.apiKey && typeof firebase !== 'undefined') {
                 try {
@@ -357,7 +366,7 @@
 
                     isCloudSynced = true;
                     document.getElementById('sync-status-pill').innerHTML = `<i class="fa-solid fa-cloud text-emerald-400"></i> Live Cloud Sync`;
-                    document.getElementById('sync-status-pill').className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
+                    document.getElementById('sync-status-pill').className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 flex items-center gap-1";
                     document.getElementById('connection-status-badge').textContent = "Connected & Syncing";
                     document.getElementById('connection-status-badge').className = "px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
 
@@ -377,7 +386,6 @@
             if (saved) {
                 try {
                     state = JSON.parse(saved);
-                    // Ensure 64 players if loaded from an older cache state
                     if (!state.players || state.players.length !== 64) {
                         loadDefaults();
                         return;
@@ -583,7 +591,6 @@
                 let scoreP1 = Number(m.scoreP1);
                 let scoreP2 = Number(m.scoreP2);
 
-                // Lower ranker assessment based on accumulated points prior to match
                 let p1IsLowerRanker = p1.points < p2.points;
                 let p2IsLowerRanker = p2.points < p1.points;
 
@@ -602,7 +609,6 @@
                 let bonusP1 = (scoreP1 === 6 && scoreP2 === 0) ? 2 : 0;
                 let bonusP2 = (scoreP2 === 6 && scoreP1 === 0) ? 2 : 0;
 
-                // 2 base points + games won + shutout bonus + lower ranker bonus
                 p1.points += (2 + scoreP1 + bonusP1 + lowerRankerBonusP1);
                 p2.points += (2 + scoreP2 + bonusP2 + lowerRankerBonusP2);
 
