@@ -26,7 +26,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-    <!-- Header Navigation -->
     <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
@@ -62,7 +61,6 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-4 mt-6">
 
         <!-- Quick Stats Banner -->
@@ -77,7 +75,7 @@
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 p-4 flex items-center justify-between">
                 <div>
                     <div class="text-xs text-slate-400 uppercase font-bold tracking-wider">Scoring System</div>
-                    <div class="text-sm font-bold text-slate-200 mt-1">Games Won + 2 Pts + Lower Ranker Bonus + (6-0 Bonus)</div>
+                    <div class="text-sm font-bold text-slate-200 mt-1">Games Won + 2 Pts</div>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-slate-900 text-tennis-400 flex items-center justify-center border border-slate-800"><i class="fa-solid fa-calculator"></i></div>
             </div>
@@ -150,7 +148,7 @@
         <section id="view-results" class="hidden space-y-4">
             <div class="bg-slate-950/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
                 <div class="p-5 border-b border-slate-800">
-                    <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-square-poll-vertical text-emerald-400"></i> Completed Results</h2>
+                    <h2 class="font-bold text-lg text-white flex items-center gap-2"><i class="fa-solid fa-square-poll-vertical text-emerald-400"></i> Completed Results & Timestamp Ledger</h2>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
@@ -160,6 +158,7 @@
                                 <th class="py-3 px-6 text-right">Player 1</th>
                                 <th class="py-3 px-4 text-center">Score</th>
                                 <th class="py-3 px-6">Player 2</th>
+                                <th class="py-3 px-6">Timestamp Recorded</th>
                                 <th class="py-3 px-6 text-center">Status</th>
                                 <th class="py-3 px-6 text-center">Action</th>
                             </tr>
@@ -294,7 +293,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Generate 64 default players programmatically
         const defaultPlayers = Array.from({ length: 64 }, (_, i) => ({
             id: i + 1,
             name: `Player ${i + 1}`
@@ -314,7 +312,6 @@
         let isCloudSynced = false;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'st-ranking-v12';
 
-        // Preloaded Firebase Configuration explicitly mapped with updated project id
         const defaultFirebaseConfig = {
             apiKey: "AIzaSyCuRWD8bjCTEGz8nhItHETL2Y66nbfFm4Y",
             authDomain: "shatinbigleaque.firebaseapp.com",
@@ -324,6 +321,12 @@
             messagingSenderId: "460883073764",
             appId: "1:460883073764:web:b8c248fbd2cc71eef56af1"
         };
+
+        function getCurrentTimestamp() {
+            const now = new Date();
+            return now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ', ' + 
+                   now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
 
         function requireQuickActionPassword(actionLabel) {
             const entered = window.prompt(`Enter password to ${actionLabel}:`);
@@ -338,11 +341,9 @@
         }
 
         window.initApp = async function() {
-            // Check local storage for configuration override, otherwise use the preloaded default config
             let savedConfig = localStorage.getItem('st_ranking_fb_config');
             let configToUse = savedConfig ? JSON.parse(savedConfig) : defaultFirebaseConfig;
 
-            // Populate settings modal inputs with active config fields
             document.getElementById('fb-apikey').value = configToUse.apiKey || '';
             document.getElementById('fb-authdomain').value = configToUse.authDomain || '';
             document.getElementById('fb-projectid').value = configToUse.projectId || '';
@@ -435,7 +436,8 @@
                             scoreP2: null,
                             tbP1: null,
                             tbP2: null,
-                            completed: false
+                            completed: false,
+                            timestamp: null
                         });
                     }
                 }
@@ -591,26 +593,12 @@
                 let scoreP1 = Number(m.scoreP1);
                 let scoreP2 = Number(m.scoreP2);
 
-                let p1IsLowerRanker = p1.points < p2.points;
-                let p2IsLowerRanker = p2.points < p1.points;
-
-                if (p1.points === p2.points) {
-                    if (p1.id > p2.id) p1IsLowerRanker = true;
-                    else p2IsLowerRanker = true;
-                }
-
-                let lowerRankerBonusP1 = p1IsLowerRanker ? 2 : 0;
-                let lowerRankerBonusP2 = p2IsLowerRanker ? 2 : 0;
-
                 p1.played++; p2.played++;
                 p1.gamesWon += scoreP1; p1.gamesLost += scoreP2;
                 p2.gamesWon += scoreP2; p2.gamesLost += scoreP1;
 
-                let bonusP1 = (scoreP1 === 6 && scoreP2 === 0) ? 2 : 0;
-                let bonusP2 = (scoreP2 === 6 && scoreP1 === 0) ? 2 : 0;
-
-                p1.points += (2 + scoreP1 + bonusP1 + lowerRankerBonusP1);
-                p2.points += (2 + scoreP2 + bonusP2 + lowerRankerBonusP2);
+                p1.points += (2 + scoreP1);
+                p2.points += (2 + scoreP2);
 
                 if (scoreP1 > scoreP2) {
                     p1.won++; p2.lost++; p1.form.push('W'); p2.form.push('L');
@@ -733,6 +721,13 @@
                 ? `<div class="font-black text-tennis-400 text-lg">${matchup.scoreP1} - ${matchup.scoreP2}${ (matchup.tbP1 !== null && matchup.tbP1 !== '' && matchup.tbP2 !== null && matchup.tbP2 !== '') ? `<span class="block text-xs font-semibold text-slate-400">(${matchup.tbP1}-${matchup.tbP2})</span>` : '' }</div>`
                 : `<span class="text-sm text-slate-500 font-semibold uppercase tracking-wider">VS</span>`;
 
+            let timestampDisplay = matchup.timestamp ? `
+                <div class="mt-2 flex items-center space-x-1.5 text-xs text-indigo-300 bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-800/50 w-fit mx-auto">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Recorded: ${matchup.timestamp}</span>
+                </div>
+            ` : '';
+
             let card = document.createElement('div');
             card.className = "bg-slate-950/80 rounded-2xl border border-slate-800 p-6 shadow-lg flex flex-col justify-between hover:border-slate-700 transition";
             card.innerHTML = `
@@ -745,6 +740,7 @@
                     <div class="w-2/12 text-center">${scoreDisplay}</div>
                     <div class="w-5/12 text-left font-extrabold text-white text-lg truncate" title="${actualP2.name}">${actualP2.name}</div>
                 </div>
+                ${timestampDisplay}
                 <div class="mt-6 pt-4 border-t border-slate-800/80 flex justify-end">
                     <button onclick="openScoreModal('${matchup.id}')" class="px-5 py-2.5 bg-tennis-600 hover:bg-tennis-500 text-white text-xs font-bold rounded-xl transition shadow-lg flex items-center gap-2">
                         <i class="fa-solid fa-pen-to-square"></i> ${matchup.completed ? 'Edit Match Score' : 'Input Match Result'}
@@ -785,7 +781,7 @@
 
             let completedMatches = state.matches.filter(m => m.completed).sort((a,b) => b.round - a.round);
             if (completedMatches.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 italic">No match results recorded yet. Go to Fixtures to enter scores!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 italic">No match results recorded yet. Go to Fixtures to enter scores!</td></tr>`;
                 return;
             }
 
@@ -793,6 +789,7 @@
                 let p1 = state.players.find(pl => pl.id === m.p1Id) || { name: "Unknown" };
                 let p2 = state.players.find(pl => pl.id === m.p2Id) || { name: "Unknown" };
                 let tbDisplay = (m.tbP1 !== null && m.tbP1 !== '' && m.tbP2 !== null && m.tbP2 !== '') ? `<span class="text-[11px] font-semibold text-slate-400 ml-1">(${m.tbP1}-${m.tbP2})</span>` : '';
+                let timestampStr = m.timestamp ? m.timestamp : '<span class="text-slate-500 italic text-xs">Not recorded</span>';
 
                 let tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-900/65 transition border-b border-slate-800/40";
@@ -801,6 +798,12 @@
                     <td class="py-4 px-6 text-right font-bold text-white">${p1.name}</td>
                     <td class="py-4 px-4 text-center font-black text-white bg-slate-900/50">${m.scoreP1} - ${m.scoreP2} ${tbDisplay}</td>
                     <td class="py-4 px-6 font-bold text-white">${p2.name}</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center space-x-1.5 text-xs text-indigo-300 bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-800/50 w-fit">
+                            <i class="fa-regular fa-clock"></i>
+                            <span>${timestampStr}</span>
+                        </div>
+                    </td>
                     <td class="py-4 px-6 text-center"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-lg border border-emerald-500/20">Final</span></td>
                     <td class="py-4 px-6 text-center">
                         <button onclick="openScoreModal('${m.id}')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition border border-slate-700">Edit</button>
@@ -871,10 +874,11 @@
             m.tbP1 = rawTbP1 !== '' ? Number(rawTbP1) : null;
             m.tbP2 = rawTbP2 !== '' ? Number(rawTbP2) : null;
             m.completed = true;
+            m.timestamp = getCurrentTimestamp();
 
             persistState();
             closeScoreModal();
-            showToast("Match result saved & synced!", "success");
+            showToast("Match result saved with timestamp & synced!", "success");
         };
 
         window.openPlayerModal = function(playerId) {
@@ -949,11 +953,12 @@
                         m.tbP1 = null; m.tbP2 = null;
                     }
                     m.completed = true;
+                    m.timestamp = getCurrentTimestamp();
                 }
             });
 
             persistState();
-            showToast("All remaining matches simulated!", "success");
+            showToast("All remaining matches simulated with timestamps!", "success");
         };
 
         window.confirmResetData = function() {
